@@ -159,6 +159,21 @@ consultar_historico_exercicio("camara:204379")
 
 Both interfaces return the same tibbles, with English columns.
 
+## Architecture
+
+![electedBR architecture: TSE files are consolidated on demand into
+yearly Parquet files hosted on Hugging Face and read by get_elected(); a
+curated events table is applied with as_of; Congress APIs are queried
+live by get_deputies(), get_senators() and get_service_history();
+everything returns tibbles with Portuguese
+aliases](reference/figures/architecture.svg)
+
+Election results are built on demand from the TSE files (which change
+only when the TSE publishes or revises them) and hosted outside the
+package; office-holding changes live in a curated table that can be
+refreshed without a package release; sitting members of Congress are
+queried live with a short cache. The three never feed each other.
+
 ## Data sources
 
 - TSE, *Resultados* and *Candidatos*:
