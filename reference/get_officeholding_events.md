@@ -19,7 +19,7 @@ get_officeholding_events(
   events = NULL,
   refresh = FALSE,
   max_age_hours = 24,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   base_url = getOption("electedBR.base_url")
 )
 
@@ -27,7 +27,7 @@ consultar_eventos_exercicio(
   eventos = NULL,
   atualizar = FALSE,
   validade_horas = 24,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   base_url = getOption("electedBR.base_url")
 )
 ```
@@ -49,8 +49,8 @@ consultar_eventos_exercicio(
 
 - cache_dir:
 
-  Cache directory; defaults to
-  `tools::R_user_dir("electedBR", "cache")`.
+  Cache directory; see
+  [`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md).
 
 - base_url:
 

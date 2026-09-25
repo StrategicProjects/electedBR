@@ -30,8 +30,13 @@ library(electedBR)
 ## Election results
 
 The yearly files are listed in `elected_years`. The first query for a
-year downloads its file (1 to 25 MB) into the user cache directory; here
-we use a temporary directory instead.
+year downloads its file (1 to 25 MB) into the cache directory, which by
+default is a folder under
+[`tempdir()`](https://rdrr.io/r/base/tempfile.html); set the
+`electedBR.cache_dir` option or the `ELECTEDBR_CACHE_DIR` environment
+variable to keep the files between sessions (see
+[`?elected_cache_dir`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md)).
+Here we use an explicit temporary directory.
 
 ``` r
 

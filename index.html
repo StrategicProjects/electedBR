@@ -96,32 +96,54 @@
 <span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"PE"</span>, office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"governor"</span>, <span class="st">"vice_governor"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"president"</span>, <span class="st">"vice_president"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_elected.html">consultar_eleitos</a></span><span class="op">(</span><span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"PE"</span>, cargo <span class="op">=</span> <span class="st">"SENADOR"</span><span class="op">)</span></span></code></pre></div>
-<p>The first query for a year downloads its file (about 1 MB for a general election, up to 25 MB for a municipal one) into <code>tools::R_user_dir("electedBR", "cache")</code>; later queries read the local copy. <code>elected_years</code> lists the files, their checksums and build dates.</p>
-<p>Columns: <code>year</code>, <code>election_id</code>, <code>round</code>, <code>state</code>, <code>municipality_tse_id</code>, <code>municipality</code>, <code>office</code>, <code>candidate_id</code>, <code>ticket_candidate_id</code>, <code>name</code>, <code>ballot_name</code>, <code>party_at_election</code>, <code>election_status</code>, <code>votes</code>, <code>reference</code>.</p>
-<p>What the results mean:</p>
-<ul>
-<li>Votes are summed over electoral zones and, for statewide offices, over municipalities; the municipal columns are then <code>NA</code> and <code>municipality</code> cannot be used as a filter. President and vice president have <code>state = NA</code> too (votes summed nationwide, including votes cast abroad).</li>
-<li>Running mates (vice president, vice governors, vice mayors) have no votes of their own: they come from the TSE candidates file, with <code>votes = NA</code> and <code>ticket_candidate_id</code> pointing to the head of their ticket.</li>
-<li>The last round available for each candidate is kept, and elections with different TSE codes (ordinary and supplementary polls) are never merged.</li>
-<li>
-<code>include_alternates = TRUE</code> adds the <code>SUPLENTE</code> rows of the TSE file. This is the classification at the poll, not a current substitution queue, and Senate ticket alternates (who have no votes of their own) are not covered.</li>
-<li>Municipality names are matched exactly, ignoring accents and case; codes are TSE codes, not IBGE codes. <code>party_at_election</code> is the party at the time of the election.</li>
-<li>Being elected does not mean being in office today: use the functions below for that.</li>
-</ul>
-<p><code><a href="reference/normalize_elected.html">normalize_elected()</a></code> is the function that builds the yearly files and is exported, so the same rules can be applied to a fresh TSE download (for example from <code>electionsBR</code>).</p>
-<div class="section level3">
-<h3 id="who-holds-the-office-on-a-given-date">Who holds the office on a given date?<a class="anchor" aria-label="anchor" href="#who-holds-the-office-on-a-given-date"></a>
-</h3>
-<p>The TSE files describe the poll and never change afterwards. Resignations, deaths, removals and successions are recorded in a small curated table, <code><a href="reference/get_officeholding_events.html">get_officeholding_events()</a></code>, served next to the yearly files and updated on demand (every row cites its source; pull requests are welcome). <code>as_of</code> applies it:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Recife: the mayor elected in 2024 resigned on 2026-04-02 to run for</span></span>
-<span><span class="co"># governor; the vice mayor took office on 2026-04-06</span></span>
-<span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"PE"</span>, municipality <span class="op">=</span> <span class="st">"Recife"</span>,</span>
-<span>            office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mayor"</span>, <span class="st">"vice_mayor"</span><span class="op">)</span>, as_of <span class="op">=</span> <span class="st">"2026-06-01"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; status_as_of: "resignation" for the mayor, "succession" for the vice mayor,</span></span>
-<span><span class="co">#&gt; whose office_as_of becomes "mayor"</span></span></code></pre></div>
+<p>The first query for a year downloads its file (about 1 MB for a general election, up to 25 MB for a municipal one) into the cache directory; later queries read the local copy. By default the cache is a folder under <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> and vanishes with the session. To keep the files, set the <code>ELECTEDBR_CACHE_DIR</code> environment variable or the <code>electedBR.cache_dir</code> option, for example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">options</span>(<span class="at">electedBR.cache_dir =</span> tools<span class="sc">::</span><span class="fu">R_user_dir</span>(<span class="st">"electedBR"</span>, <span class="st">"cache"</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="st">```</span><span class="at"> </span><span class="st">`</span>elected_years<span class="st">`</span><span class="at"> lists the files, their checksums and build dates.</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="at">Columns: </span><span class="st">`</span>year<span class="st">`</span><span class="at">, </span><span class="st">`</span>election_id<span class="st">`</span><span class="at">, </span><span class="st">`</span>round<span class="st">`</span><span class="at">, </span><span class="st">`</span>state<span class="st">`</span><span class="at">, </span><span class="st">`</span>municipality_tse_id<span class="st">`</span><span class="at">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="st">`</span>municipality<span class="st">`</span><span class="at">, </span><span class="st">`</span>office<span class="st">`</span><span class="at">, </span><span class="st">`</span>candidate_id<span class="st">`</span><span class="at">, </span><span class="st">`</span>ticket_candidate_id<span class="st">`</span><span class="at">, </span><span class="st">`</span>name<span class="st">`</span><span class="at">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="st">`</span>ballot_name<span class="st">`</span><span class="at">, </span><span class="st">`</span>party_at_election<span class="st">`</span><span class="at">, </span><span class="st">`</span>election_status<span class="st">`</span><span class="at">, </span><span class="st">`</span>votes<span class="st">`</span><span class="at">, </span><span class="st">`</span>reference<span class="st">`</span><span class="at">.</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="at">What the results mean:</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="at">* Votes are summed over electoral zones and, for statewide offices, over</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="at">  municipalities; the municipal columns are then </span><span class="st">`</span>NA<span class="st">`</span><span class="at"> and </span><span class="st">`</span>municipality<span class="st">`</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="at">  cannot be used as a filter. President and vice president have </span><span class="st">`</span>state <span class="ot">=</span> NA<span class="st">`</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="at">  too (votes summed nationwide, including votes cast abroad).</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="at">* Running mates (vice president, vice governors, vice mayors) have no votes</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="at">  of their own: they come from the TSE candidates file, with </span><span class="st">`</span>votes <span class="ot">=</span> NA<span class="st">`</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="at">  and </span><span class="st">`</span>ticket_candidate_id<span class="st">`</span><span class="at"> pointing to the head of their ticket.</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="at">* The last round available for each candidate is kept, and elections with</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="at">  different TSE codes (ordinary and supplementary polls) are never merged.</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="at">* </span><span class="st">`</span>include_alternates <span class="ot">=</span> TRUE<span class="st">`</span><span class="at"> adds the </span><span class="st">`</span>SUPLENTE<span class="st">`</span><span class="at"> rows of the TSE file. This</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="at">  is the classification at the poll, not a current substitution queue, and</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="at">  Senate ticket alternates (who have no votes of their own) are not covered.</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="at">* Municipality names are matched exactly, ignoring accents and case; codes</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="at">  are TSE codes, not IBGE codes. </span><span class="st">`</span>party_at_election<span class="st">`</span><span class="at"> is the party at the</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="at">  time of the election.</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="at">* Being elected does not mean being in office today: use the functions</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="at">  below for that.</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="st">`</span><span class="fu">normalize_elected</span>()<span class="st">`</span><span class="at"> is the function that builds the yearly files and is</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="at">exported, so the same rules can be applied to a fresh TSE download (for</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="at">example from </span><span class="st">`</span>electionsBR<span class="st">`</span><span class="at">).</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="at">### Who holds the office on a given date?</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="at">The TSE files describe the poll and never change afterwards. Resignations,</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="at">deaths, removals and successions are recorded in a small curated table,</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="st">`</span><span class="fu">get_officeholding_events</span>()<span class="st">`</span><span class="at">, served next to the yearly files and updated on</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="at">demand (every row cites its source; pull requests are welcome). </span><span class="st">`</span>as_of<span class="st">`</span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="at">applies it:</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="st">```</span> r</span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="co"># Recife: the mayor elected in 2024 resigned on 2026-04-02 to run for</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co"># governor; the vice mayor took office on 2026-04-06</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="fu">get_elected</span>(<span class="at">state =</span> <span class="st">"PE"</span>, <span class="at">municipality =</span> <span class="st">"Recife"</span>,</span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a>            <span class="at">office =</span> <span class="fu">c</span>(<span class="st">"mayor"</span>, <span class="st">"vice_mayor"</span>), <span class="at">as_of =</span> <span class="st">"2026-06-01"</span>)</span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a><span class="co">#&gt; status_as_of: "resignation" for the mayor, "succession" for the vice mayor,</span></span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="co">#&gt; whose office_as_of becomes "mayor"</span></span></code></pre></div>
 <p>An official without a recorded event gets <code>status_as_of = "no_change_recorded"</code>, which means exactly that, not that they are in office.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="sitting-members-of-congress">Sitting members of Congress<a class="anchor" aria-label="anchor" href="#sitting-members-of-congress"></a>
@@ -179,10 +201,10 @@
 </tr>
 <tr>
 <td>
-<code><a href="reference/normalize_elected.html">normalize_elected()</a></code>, <code><a href="reference/elected_clear_cache.html">elected_clear_cache()</a></code>
+<code><a href="reference/normalize_elected.html">normalize_elected()</a></code>, <code><a href="reference/elected_cache_dir.html">elected_cache_dir()</a></code>, <code><a href="reference/elected_clear_cache.html">elected_clear_cache()</a></code>
 </td>
 <td>
-<code><a href="reference/normalize_elected.html">normalizar_eleitos()</a></code>, <code><a href="reference/elected_clear_cache.html">limpar_cache_eleitos()</a></code>
+<code><a href="reference/normalize_elected.html">normalizar_eleitos()</a></code>, <code><a href="reference/elected_cache_dir.html">diretorio_cache_eleitos()</a></code>, <code><a href="reference/elected_clear_cache.html">limpar_cache_eleitos()</a></code>
 </td>
 </tr>
 <tr>

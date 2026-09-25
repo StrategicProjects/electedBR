@@ -8,8 +8,12 @@ First CRAN release.
   TSE open data and hosted on Hugging Face
   (<https://huggingface.co/datasets/mlkwy/electedBR>), indexed by the
   new `elected_years` dataset. The first query for a year downloads 1 to
-  25 MB into the user cache; `electionsBR` is no longer a dependency and
-  the multi-hundred-megabyte TSE downloads are gone.
+  25 MB into the cache directory
+  ([`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md):
+  a folder under [`tempdir()`](https://rdrr.io/r/base/tempfile.html) by
+  default, persistent when `ELECTEDBR_CACHE_DIR` or the
+  `electedBR.cache_dir` option is set); `electionsBR` is no longer a
+  dependency and the multi-hundred-megabyte TSE downloads are gone.
   [`normalize_elected()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md)
   remains exported and is the function that builds those files.
 - [`get_elected()`](https://strategicprojects.github.io/electedBR/reference/get_elected.md)

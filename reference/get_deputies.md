@@ -17,7 +17,7 @@ get_deputies(
   role = NULL,
   refresh = FALSE,
   max_age_hours = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 get_senators(
@@ -27,7 +27,7 @@ get_senators(
   role = NULL,
   refresh = FALSE,
   max_age_hours = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 consultar_deputados(
@@ -37,7 +37,7 @@ consultar_deputados(
   condicao = NULL,
   atualizar = FALSE,
   validade_horas = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 consultar_senadores(
@@ -47,7 +47,7 @@ consultar_senadores(
   condicao = NULL,
   atualizar = FALSE,
   validade_horas = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 ```
 
@@ -80,8 +80,8 @@ consultar_senadores(
 
 - cache_dir:
 
-  Cache directory; defaults to
-  `tools::R_user_dir("electedBR", "cache")`.
+  Cache directory; see
+  [`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md).
 
 - uf, partido, situacao, condicao, atualizar, validade_horas:
 

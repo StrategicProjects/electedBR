@@ -35,6 +35,9 @@ Current composition of the Chamber of Deputies and the Federal Senate.
 
 ## Utilities
 
+- [`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md)
+  [`diretorio_cache_eleitos()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md)
+  : Cache directory
 - [`elected_clear_cache()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md)
   [`limpar_cache_eleitos()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md)
   : Remove cached files

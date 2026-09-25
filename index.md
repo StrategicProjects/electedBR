@@ -50,55 +50,53 @@ consultar_eleitos(2022, uf = "PE", cargo = "SENADOR")
 ```
 
 The first query for a year downloads its file (about 1 MB for a general
-election, up to 25 MB for a municipal one) into
-`tools::R_user_dir("electedBR", "cache")`; later queries read the local
-copy. `elected_years` lists the files, their checksums and build dates.
+election, up to 25 MB for a municipal one) into the cache directory;
+later queries read the local copy. By default the cache is a folder
+under [`tempdir()`](https://rdrr.io/r/base/tempfile.html) and vanishes
+with the session. To keep the files, set the `ELECTEDBR_CACHE_DIR`
+environment variable or the `electedBR.cache_dir` option, for example:
+
+``` r
+options(electedBR.cache_dir = tools::R_user_dir("electedBR", "cache"))
+``` `elected_years` lists the files, their checksums and build dates.
 
 Columns: `year`, `election_id`, `round`, `state`, `municipality_tse_id`,
 `municipality`, `office`, `candidate_id`, `ticket_candidate_id`, `name`,
-`ballot_name`, `party_at_election`, `election_status`, `votes`,
-`reference`.
+`ballot_name`, `party_at_election`, `election_status`, `votes`, `reference`.
 
 What the results mean:
 
-- Votes are summed over electoral zones and, for statewide offices, over
+* Votes are summed over electoral zones and, for statewide offices, over
   municipalities; the municipal columns are then `NA` and `municipality`
-  cannot be used as a filter. President and vice president have
-  `state = NA` too (votes summed nationwide, including votes cast
-  abroad).
-- Running mates (vice president, vice governors, vice mayors) have no
-  votes of their own: they come from the TSE candidates file, with
-  `votes = NA` and `ticket_candidate_id` pointing to the head of their
-  ticket.
-- The last round available for each candidate is kept, and elections
-  with different TSE codes (ordinary and supplementary polls) are never
-  merged.
-- `include_alternates = TRUE` adds the `SUPLENTE` rows of the TSE file.
-  This is the classification at the poll, not a current substitution
-  queue, and Senate ticket alternates (who have no votes of their own)
-  are not covered.
-- Municipality names are matched exactly, ignoring accents and case;
-  codes are TSE codes, not IBGE codes. `party_at_election` is the party
-  at the time of the election.
-- Being elected does not mean being in office today: use the functions
+  cannot be used as a filter. President and vice president have `state = NA`
+  too (votes summed nationwide, including votes cast abroad).
+* Running mates (vice president, vice governors, vice mayors) have no votes
+  of their own: they come from the TSE candidates file, with `votes = NA`
+  and `ticket_candidate_id` pointing to the head of their ticket.
+* The last round available for each candidate is kept, and elections with
+  different TSE codes (ordinary and supplementary polls) are never merged.
+* `include_alternates = TRUE` adds the `SUPLENTE` rows of the TSE file. This
+  is the classification at the poll, not a current substitution queue, and
+  Senate ticket alternates (who have no votes of their own) are not covered.
+* Municipality names are matched exactly, ignoring accents and case; codes
+  are TSE codes, not IBGE codes. `party_at_election` is the party at the
+  time of the election.
+* Being elected does not mean being in office today: use the functions
   below for that.
 
-[`normalize_elected()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md)
-is the function that builds the yearly files and is exported, so the
-same rules can be applied to a fresh TSE download (for example from
-`electionsBR`).
+`normalize_elected()` is the function that builds the yearly files and is
+exported, so the same rules can be applied to a fresh TSE download (for
+example from `electionsBR`).
 
 ### Who holds the office on a given date?
 
-The TSE files describe the poll and never change afterwards.
-Resignations, deaths, removals and successions are recorded in a small
-curated table,
-[`get_officeholding_events()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md),
-served next to the yearly files and updated on demand (every row cites
-its source; pull requests are welcome). `as_of` applies it:
+The TSE files describe the poll and never change afterwards. Resignations,
+deaths, removals and successions are recorded in a small curated table,
+`get_officeholding_events()`, served next to the yearly files and updated on
+demand (every row cites its source; pull requests are welcome). `as_of`
+applies it:
 
 ``` r
-
 # Recife: the mayor elected in 2024 resigned on 2026-04-02 to run for
 # governor; the vice mayor took office on 2026-04-06
 get_elected(state = "PE", municipality = "Recife",
@@ -151,7 +149,7 @@ consultar_historico_exercicio("camara:204379")
 | [`get_deputies()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md), [`get_senators()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md) | [`consultar_deputados()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md), [`consultar_senadores()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md) |
 | [`get_service_history()`](https://strategicprojects.github.io/electedBR/reference/get_service_history.md) | [`consultar_historico_exercicio()`](https://strategicprojects.github.io/electedBR/reference/get_service_history.md) |
 | [`get_officeholding_events()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md) | [`consultar_eventos_exercicio()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md) |
-| [`normalize_elected()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md), [`elected_clear_cache()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md) | [`normalizar_eleitos()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md), [`limpar_cache_eleitos()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md) |
+| [`normalize_elected()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md), [`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md), [`elected_clear_cache()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md) | [`normalizar_eleitos()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md), [`diretorio_cache_eleitos()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md), [`limpar_cache_eleitos()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md) |
 | `year`, `state`, `municipality`, `office`, `party` | `ano`, `uf`, `municipio`, `cargo`, `partido` |
 | `include_alternates`, `refresh`, `max_age_hours` | `incluir_suplentes`, `atualizar`, `validade_horas` |
 | `as_of`, `events` | `data_referencia`, `eventos` |

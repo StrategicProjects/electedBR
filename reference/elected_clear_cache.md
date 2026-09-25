@@ -7,17 +7,17 @@ again.
 ## Usage
 
 ``` r
-elected_clear_cache(cache_dir = tools::R_user_dir("electedBR", "cache"))
+elected_clear_cache(cache_dir = elected_cache_dir())
 
-limpar_cache_eleitos(cache_dir = tools::R_user_dir("electedBR", "cache"))
+limpar_cache_eleitos(cache_dir = elected_cache_dir())
 ```
 
 ## Arguments
 
 - cache_dir:
 
-  Cache directory; the package default is
-  `tools::R_user_dir("electedBR", "cache")`.
+  Cache directory; see
+  [`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md).
 
 ## Value
 

@@ -19,7 +19,7 @@ get_elected(
   office = NULL,
   party = NULL,
   include_alternates = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   refresh = FALSE,
   as_of = NULL,
   events = NULL,
@@ -31,7 +31,7 @@ get_mayors(
   state = NULL,
   municipality = NULL,
   party = NULL,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   refresh = FALSE,
   as_of = NULL,
   events = NULL,
@@ -44,7 +44,7 @@ get_councilors(
   municipality = NULL,
   party = NULL,
   include_alternates = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   refresh = FALSE,
   base_url = getOption("electedBR.base_url")
 )
@@ -56,7 +56,7 @@ consultar_eleitos(
   cargo = NULL,
   partido = NULL,
   incluir_suplentes = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   atualizar = FALSE,
   data_referencia = NULL,
   eventos = NULL,
@@ -68,7 +68,7 @@ consultar_prefeitos(
   uf = NULL,
   municipio = NULL,
   partido = NULL,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   atualizar = FALSE,
   data_referencia = NULL,
   eventos = NULL,
@@ -81,7 +81,7 @@ consultar_vereadores(
   municipio = NULL,
   partido = NULL,
   incluir_suplentes = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   atualizar = FALSE,
   base_url = getOption("electedBR.base_url")
 )
@@ -125,9 +125,12 @@ consultar_vereadores(
 
 - cache_dir:
 
-  Directory where the yearly files are stored. Defaults to the per-user
-  cache directory returned by
-  [`tools::R_user_dir()`](https://rdrr.io/r/tools/userdir.html).
+  Directory where the yearly files are stored; see
+  [`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md).
+  By default a folder under
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html), so set the option
+  or environment variable described there to keep files between
+  sessions.
 
 - refresh:
 
@@ -185,9 +188,12 @@ attributes `source` (TSE dataset page) and `notice` are set.
 The first call for a year downloads its Parquet file (about 1 MB for a
 general election, up to 25 MB for a municipal one, see
 `elected_years$bytes`) into `cache_dir`; later calls read the local
-copy. Results describe who was elected in the poll: they do not
-establish who currently holds office nor current party membership. For
-sitting members of Congress use
+copy. The default cache lives under
+[`tempdir()`](https://rdrr.io/r/base/tempfile.html); see
+[`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md)
+to make it persistent. Results describe who was elected in the poll:
+they do not establish who currently holds office nor current party
+membership. For sitting members of Congress use
 [`get_deputies()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md)
 and
 [`get_senators()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md);

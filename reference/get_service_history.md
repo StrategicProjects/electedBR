@@ -15,14 +15,14 @@ get_service_history(
   person_id,
   refresh = FALSE,
   max_age_hours = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 consultar_historico_exercicio(
   id_pessoa,
   atualizar = FALSE,
   validade_horas = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 ```
 
@@ -42,8 +42,8 @@ consultar_historico_exercicio(
 
 - cache_dir:
 
-  Cache directory; defaults to
-  `tools::R_user_dir("electedBR", "cache")`.
+  Cache directory; see
+  [`elected_cache_dir()`](https://strategicprojects.github.io/electedBR/reference/elected_cache_dir.md).
 
 - id_pessoa, atualizar, validade_horas:
 

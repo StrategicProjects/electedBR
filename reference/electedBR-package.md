@@ -2,15 +2,15 @@
 
 Retrieves the candidates elected in Brazilian municipal and general
 elections since 2018, consolidated from the open data of the Superior
-Electoral Court ('TSE', <https://dadosabertos.tse.jus.br/>) and
-distributed as yearly 'Parquet' files, together with the federal
-deputies and senators currently serving according to the open data
-'APIs' of the Chamber of Deputies
-(<https://dadosabertos.camara.leg.br/>) and the Federal Senate
-(<https://www12.senado.leg.br/dados-abertos>). Election results and
-current office holding are kept as distinct queries; electoral roles,
-service history and provenance are preserved. Every function returns a
-tibble with English column names and has a Portuguese alias.
+Electoral Court (TSE, <https://dadosabertos.tse.jus.br/>) and
+distributed as yearly Parquet files, together with the federal deputies
+and senators currently serving according to the open data APIs of the
+Chamber of Deputies (<https://dadosabertos.camara.leg.br/>) and the
+Federal Senate (<https://www12.senado.leg.br/dados-abertos>). Election
+results and current office holding are kept as distinct queries;
+electoral roles, service history and provenance are preserved. Every
+function returns a tibble with English column names and has a Portuguese
+alias.
 
 ## See also
 
