@@ -1,22 +1,19 @@
-# Consolidate TSE vote records into the candidates elected
+# Consolidate TSE files into the candidates elected
 
 Turns the raw *votação nominal por município e zona* table published by
 the Superior Electoral Court (TSE) into one row per elected candidate.
-Votes are summed over electoral zones (and, for statewide offices, over
-municipalities), the last round available for each candidate is kept,
-and distinct elections held on the same date (for instance ordinary and
-supplementary polls, which have different `CD_ELEICAO` codes) are never
-merged. This is the function that builds the yearly files distributed
-with the package; it is exported so that the same rules can be applied
-to a fresh TSE download (for example the output of
-`electionsBR::elections_tse()`).
+Votes are summed over electoral zones (over municipalities for statewide
+offices and over the whole country for president), the last round
+available for each candidate is kept, and distinct elections held on the
+same date (for instance ordinary and supplementary polls, which have
+different `CD_ELEICAO` codes) are never merged.
 
 ## Usage
 
 ``` r
-normalize_elected(data, include_alternates = FALSE)
+normalize_elected(data, candidates = NULL, include_alternates = FALSE)
 
-normalizar_eleitos(dados, incluir_suplentes = FALSE)
+normalizar_eleitos(dados, candidatos = NULL, incluir_suplentes = FALSE)
 ```
 
 ## Arguments
@@ -30,6 +27,14 @@ normalizar_eleitos(dados, incluir_suplentes = FALSE)
   `DS_SIT_TOT_TURNO` and `QT_VOTOS_NOMINAIS` are required
   (case-insensitive).
 
+- candidates:
+
+  Optional data frame with the TSE candidates layout (`consulta_cand`),
+  used to add the elected running mates. The columns `ANO_ELEICAO`,
+  `CD_ELEICAO`, `NR_TURNO`, `SG_UF`, `SG_UE`, `NM_UE`, `CD_CARGO`,
+  `SQ_CANDIDATO`, `NR_CANDIDATO`, `NM_CANDIDATO`, `NM_URNA_CANDIDATO`,
+  `SG_PARTIDO` and `DS_SIT_TOT_TURNO` are required.
+
 - include_alternates:
 
   Logical. Also keep candidates whose final status is `SUPLENTE`
@@ -38,20 +43,36 @@ normalizar_eleitos(dados, incluir_suplentes = FALSE)
   [`get_senators()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md)
   for the alternates currently serving.
 
-- dados, incluir_suplentes:
+- dados, candidatos, incluir_suplentes:
 
-  Portuguese aliases of `data` and `include_alternates`.
+  Portuguese aliases of `data`, `candidates` and `include_alternates`.
 
 ## Value
 
 A tibble with one row per candidate and election, with the columns
 `year`, `election_id`, `round`, `state`, `municipality_tse_id`,
-`municipality`, `office`, `candidate_id`, `name`, `ballot_name`,
-`party_at_election`, `election_status`, `votes` and `reference`. For
-statewide offices `municipality_tse_id` and `municipality` are `NA`.
-`office` is one of `mayor`, `deputy_mayor`, `councilor`, `senator`,
-`federal_deputy`, `state_deputy` or `district_deputy`; presidential and
-gubernatorial rows are dropped.
+`municipality`, `office`, `candidate_id`, `ticket_candidate_id`, `name`,
+`ballot_name`, `party_at_election`, `election_status`, `votes` and
+`reference`. `office` is one of `president`, `vice_president`,
+`governor`, `vice_governor`, `senator`, `federal_deputy`,
+`state_deputy`, `district_deputy`, `mayor`, `vice_mayor` or `councilor`.
+For statewide offices `municipality_tse_id` and `municipality` are `NA`;
+for president and vice president `state` is `NA` as well.
+`ticket_candidate_id` is `NA` except for running mates, and `votes` is
+`NA` for running mates.
+
+## Details
+
+Running mates (vice president, vice governors and vice mayors) receive
+no votes of their own and are absent from the vote files. When the TSE
+*candidatos* table of the same year is given in `candidates`, the
+running mates classified as elected are added with `votes = NA` and
+`ticket_candidate_id` pointing to the head of their ticket (same
+`NR_CANDIDATO` in the same election and electoral unit).
+
+This is the function that builds the yearly files distributed with the
+package; it is exported so that the same rules can be applied to a fresh
+TSE download (for example the output of `electionsBR::elections_tse()`).
 
 ## See also
 
@@ -61,7 +82,7 @@ for the ready-made yearly files.
 ## Examples
 
 ``` r
-raw <- data.frame(
+votes <- data.frame(
   ANO_ELEICAO = 2024, CD_ELEICAO = "619", NR_TURNO = 1, SG_UF = "PE",
   CD_MUNICIPIO = "25313", NM_MUNICIPIO = "RECIFE", CD_CARGO = "13",
   DS_CARGO = "Vereador", SQ_CANDIDATO = c("1", "1", "2"),
@@ -71,21 +92,21 @@ raw <- data.frame(
   DS_SIT_TOT_TURNO = c("ELEITO POR QP", "ELEITO POR QP", "SUPLENTE"),
   QT_VOTOS_NOMINAIS = c(100, 50, 200)
 )
-normalize_elected(raw)
-#> # A tibble: 1 × 14
+normalize_elected(votes)
+#> # A tibble: 1 × 15
 #>    year election_id round state municipality_tse_id municipality office   
 #>   <int> <chr>       <int> <chr> <chr>               <chr>        <chr>    
 #> 1  2024 619             1 PE    25313               RECIFE       councilor
-#> # ℹ 7 more variables: candidate_id <chr>, name <chr>, ballot_name <chr>,
-#> #   party_at_election <chr>, election_status <chr>, votes <dbl>,
-#> #   reference <chr>
-normalize_elected(raw, include_alternates = TRUE)
-#> # A tibble: 2 × 14
+#> # ℹ 8 more variables: candidate_id <chr>, ticket_candidate_id <chr>,
+#> #   name <chr>, ballot_name <chr>, party_at_election <chr>,
+#> #   election_status <chr>, votes <dbl>, reference <chr>
+normalize_elected(votes, include_alternates = TRUE)
+#> # A tibble: 2 × 15
 #>    year election_id round state municipality_tse_id municipality office   
 #>   <int> <chr>       <int> <chr> <chr>               <chr>        <chr>    
 #> 1  2024 619             1 PE    25313               RECIFE       councilor
 #> 2  2024 619             1 PE    25313               RECIFE       councilor
-#> # ℹ 7 more variables: candidate_id <chr>, name <chr>, ballot_name <chr>,
-#> #   party_at_election <chr>, election_status <chr>, votes <dbl>,
-#> #   reference <chr>
+#> # ℹ 8 more variables: candidate_id <chr>, ticket_candidate_id <chr>,
+#> #   name <chr>, ballot_name <chr>, party_at_election <chr>,
+#> #   election_status <chr>, votes <dbl>, reference <chr>
 ```

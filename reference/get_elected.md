@@ -4,10 +4,10 @@ Returns the candidates elected (and optionally the alternates) in a
 Brazilian election year, from the yearly files derived from the TSE open
 data and hosted by the package (see
 [elected_years](https://strategicprojects.github.io/electedBR/reference/elected_years.md)).
-Municipal offices (mayor, deputy mayor, councilor) are available for
-municipal election years (2020, 2024, ...) and legislative offices
-(senator, federal, state and district deputy) for general election years
-(2018, 2022, ...).
+Municipal offices (mayor, vice mayor, councilor) are available for
+municipal election years (2020, 2024, ...) and president, vice
+president, governors, vice governors, senators and federal, state and
+district deputies for general election years (2018, 2022, ...).
 
 ## Usage
 
@@ -21,6 +21,8 @@ get_elected(
   include_alternates = FALSE,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   refresh = FALSE,
+  as_of = NULL,
+  events = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -31,6 +33,8 @@ get_mayors(
   party = NULL,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   refresh = FALSE,
+  as_of = NULL,
+  events = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -54,6 +58,8 @@ consultar_eleitos(
   incluir_suplentes = FALSE,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   atualizar = FALSE,
+  data_referencia = NULL,
+  eventos = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -64,6 +70,8 @@ consultar_prefeitos(
   partido = NULL,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   atualizar = FALSE,
+  data_referencia = NULL,
+  eventos = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -88,7 +96,8 @@ consultar_vereadores(
 - state:
 
   One or more two-letter state abbreviations (`"PE"`, `"SP"`). `NULL`
-  (the default) keeps every state.
+  (the default) keeps every state. President and vice president rows
+  carry no state and are dropped when `state` is given.
 
 - municipality:
 
@@ -97,11 +106,12 @@ consultar_vereadores(
 
 - office:
 
-  One or more of `"mayor"`, `"deputy_mayor"`, `"councilor"`,
-  `"senator"`, `"federal_deputy"`, `"state_deputy"` and
-  `"district_deputy"`. `NULL` keeps every office in the year. The TSE
-  vote files list no votes for deputy mayors (they run on the mayor's
-  ticket), so `"deputy_mayor"` currently returns no rows.
+  One or more of `"president"`, `"vice_president"`, `"governor"`,
+  `"vice_governor"`, `"senator"`, `"federal_deputy"`, `"state_deputy"`,
+  `"district_deputy"`, `"mayor"`, `"vice_mayor"` and `"councilor"`.
+  `NULL` keeps every office in the year. Running mates come from the TSE
+  candidates file, have `votes = NA` and are linked to the head of their
+  ticket by `ticket_candidate_id`.
 
 - party:
 
@@ -123,6 +133,23 @@ consultar_vereadores(
 
   Logical. Download the file again even if a copy is cached.
 
+- as_of:
+
+  Optional date (or string convertible with
+  [`as.Date()`](https://rdrr.io/r/base/as.Date.html)). When given, the
+  office-holding events dated on or before it are applied and the
+  columns `status_as_of`, `status_date`, `office_as_of` and
+  `status_source` are added: `status_as_of` is the latest event recorded
+  for the official (`resignation`, `death`, `removal`, `leave`,
+  `return`), `succession` for a running mate who took over (with
+  `office_as_of` set to the office assumed) or `no_change_recorded`.
+
+- events:
+
+  Optional events table with the columns of
+  [`get_officeholding_events()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md),
+  used instead of downloading it.
+
 - base_url:
 
   Optional base URL of a mirror hosting the files listed in
@@ -132,21 +159,24 @@ consultar_vereadores(
   [elected_years](https://strategicprojects.github.io/electedBR/reference/elected_years.md)
   is used.
 
-- ano, uf, municipio, cargo, partido, incluir_suplentes, atualizar:
+- ano, uf, municipio, cargo, partido, incluir_suplentes, atualizar,
+  data_referencia, eventos:
 
   Portuguese aliases of `year`, `state`, `municipality`, `office`,
-  `party`, `include_alternates` and `refresh`. `cargo` also accepts the
-  Portuguese labels `"PREFEITO"`, `"VICE-PREFEITO"`, `"VEREADOR"`,
-  `"SENADOR"`, `"DEPUTADO FEDERAL"`, `"DEPUTADO ESTADUAL"` and
-  `"DEPUTADO DISTRITAL"`.
+  `party`, `include_alternates`, `refresh`, `as_of` and `events`.
+  `cargo` also accepts the Portuguese labels `"PRESIDENTE"`,
+  `"VICE-PRESIDENTE"`, `"GOVERNADOR"`, `"VICE-GOVERNADOR"`, `"SENADOR"`,
+  `"DEPUTADO FEDERAL"`, `"DEPUTADO ESTADUAL"`, `"DEPUTADO DISTRITAL"`,
+  `"PREFEITO"`, `"VICE-PREFEITO"` and `"VEREADOR"`.
 
 ## Value
 
 A tibble with the columns documented in
 [`normalize_elected()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md):
 `year`, `election_id`, `round`, `state`, `municipality_tse_id`,
-`municipality`, `office`, `candidate_id`, `name`, `ballot_name`,
-`party_at_election`, `election_status`, `votes` and `reference`. An
+`municipality`, `office`, `candidate_id`, `ticket_candidate_id`, `name`,
+`ballot_name`, `party_at_election`, `election_status`, `votes` and
+`reference`, plus the four `*_as_of` columns when `as_of` is given. An
 empty tibble with the same columns is returned when no row matches. The
 attributes `source` (TSE dataset page) and `notice` are set.
 
@@ -160,12 +190,18 @@ establish who currently holds office nor current party membership. For
 sitting members of Congress use
 [`get_deputies()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md)
 and
-[`get_senators()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md).
+[`get_senators()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md);
+for mayors and governors, `as_of` applies the curated
+[`get_officeholding_events()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md)
+table (resignations, deaths, removals, leaves and successions), which
+records changes but does not prove that an official without a record is
+in office.
 
 ## See also
 
 `get_mayors()`, `get_councilors()`,
 [elected_years](https://strategicprojects.github.io/electedBR/reference/elected_years.md),
+[`get_officeholding_events()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md),
 [`elected_clear_cache()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md).
 
 ## Examples
@@ -179,6 +215,14 @@ get_mayors(state = "PE", municipality = c("Recife", "Caruaru"),
 # Federal deputies elected in 2022, including alternates
 get_elected(2022, state = "PE", office = "federal_deputy",
             include_alternates = TRUE, cache_dir = tempdir())
+
+# Governor and vice governor of Pernambuco elected in 2022
+get_elected(2022, state = "PE", office = c("governor", "vice_governor"),
+            cache_dir = tempdir())
+
+# Who holds the Recife mayoralty on a given date, after the 2026 resignation
+get_mayors(state = "PE", municipality = "Recife", as_of = "2026-06-01",
+           cache_dir = tempdir())
 
 # Same query through the Portuguese alias
 consultar_eleitos(2022, uf = "PE", cargo = "DEPUTADO FEDERAL",

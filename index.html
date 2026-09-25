@@ -65,9 +65,9 @@
 <p>electedBR answers two different questions about Brazilian politics and keeps them apart:</p>
 <ul>
 <li>
-<strong>Who was elected?</strong> Candidates elected in municipal (2020, 2024) and general (2018, 2022) elections, consolidated from the open data of the Superior Electoral Court (<a href="https://dadosabertos.tse.jus.br/" class="external-link">TSE</a>) into one small Parquet file per year, hosted on <a href="https://huggingface.co/datasets/mlkwy/electedBR" class="external-link">Hugging Face</a>.</li>
+<strong>Who was elected?</strong> Candidates elected in municipal (2020, 2024) and general (2018, 2022) elections, from president and governors to councilors, running mates included, consolidated from the open data of the Superior Electoral Court (<a href="https://dadosabertos.tse.jus.br/" class="external-link">TSE</a>) into one small Parquet file per year, hosted on <a href="https://huggingface.co/datasets/mlkwy/electedBR" class="external-link">Hugging Face</a>.</li>
 <li>
-<strong>Who is serving now?</strong> Federal deputies and senators currently in service, from the open data APIs of the <a href="https://dadosabertos.camara.leg.br/" class="external-link">Chamber of Deputies</a> and the <a href="https://www12.senado.leg.br/dados-abertos" class="external-link">Federal Senate</a>, plus the official service history of each member.</li>
+<strong>Who is serving now?</strong> Federal deputies and senators currently in service, from the open data APIs of the <a href="https://dadosabertos.camara.leg.br/" class="external-link">Chamber of Deputies</a> and the <a href="https://www12.senado.leg.br/dados-abertos" class="external-link">Federal Senate</a>, plus the official service history of each member. For mayors and governors, who have no such API, a curated table of office-holding events (resignations, successions) can be applied to the election results as of a date.</li>
 </ul>
 <p>Every function returns a tibble with English column names, and every function has a Portuguese alias.</p>
 <div class="section level2">
@@ -91,28 +91,42 @@
 <span><span class="fu"><a href="reference/get_elected.html">get_councilors</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"PE"</span>, municipality <span class="op">=</span> <span class="st">"Recife"</span>, party <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PT"</span>, <span class="st">"PSB"</span><span class="op">)</span>,</span>
 <span>               include_alternates <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># General elections: statewide offices</span></span>
+<span><span class="co"># General elections: statewide and nationwide offices</span></span>
 <span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"PE"</span>, office <span class="op">=</span> <span class="st">"federal_deputy"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"DF"</span>, office <span class="op">=</span> <span class="st">"district_deputy"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"PE"</span>, office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"governor"</span>, <span class="st">"vice_governor"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"president"</span>, <span class="st">"vice_president"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_elected.html">consultar_eleitos</a></span><span class="op">(</span><span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"PE"</span>, cargo <span class="op">=</span> <span class="st">"SENADOR"</span><span class="op">)</span></span></code></pre></div>
 <p>The first query for a year downloads its file (about 1 MB for a general election, up to 25 MB for a municipal one) into <code>tools::R_user_dir("electedBR", "cache")</code>; later queries read the local copy. <code>elected_years</code> lists the files, their checksums and build dates.</p>
-<p>Columns: <code>year</code>, <code>election_id</code>, <code>round</code>, <code>state</code>, <code>municipality_tse_id</code>, <code>municipality</code>, <code>office</code>, <code>candidate_id</code>, <code>name</code>, <code>ballot_name</code>, <code>party_at_election</code>, <code>election_status</code>, <code>votes</code>, <code>reference</code>.</p>
+<p>Columns: <code>year</code>, <code>election_id</code>, <code>round</code>, <code>state</code>, <code>municipality_tse_id</code>, <code>municipality</code>, <code>office</code>, <code>candidate_id</code>, <code>ticket_candidate_id</code>, <code>name</code>, <code>ballot_name</code>, <code>party_at_election</code>, <code>election_status</code>, <code>votes</code>, <code>reference</code>.</p>
 <p>What the results mean:</p>
 <ul>
-<li>Votes are summed over electoral zones and, for statewide offices, over municipalities; the municipal columns are then <code>NA</code> and <code>municipality</code> cannot be used as a filter.</li>
+<li>Votes are summed over electoral zones and, for statewide offices, over municipalities; the municipal columns are then <code>NA</code> and <code>municipality</code> cannot be used as a filter. President and vice president have <code>state = NA</code> too (votes summed nationwide, including votes cast abroad).</li>
+<li>Running mates (vice president, vice governors, vice mayors) have no votes of their own: they come from the TSE candidates file, with <code>votes = NA</code> and <code>ticket_candidate_id</code> pointing to the head of their ticket.</li>
 <li>The last round available for each candidate is kept, and elections with different TSE codes (ordinary and supplementary polls) are never merged.</li>
 <li>
 <code>include_alternates = TRUE</code> adds the <code>SUPLENTE</code> rows of the TSE file. This is the classification at the poll, not a current substitution queue, and Senate ticket alternates (who have no votes of their own) are not covered.</li>
 <li>Municipality names are matched exactly, ignoring accents and case; codes are TSE codes, not IBGE codes. <code>party_at_election</code> is the party at the time of the election.</li>
-<li>Deputy mayors run on the mayor’s ticket and have no votes of their own in the TSE files, so <code>office = "deputy_mayor"</code> returns no rows; presidents and governors are not covered.</li>
 <li>Being elected does not mean being in office today: use the functions below for that.</li>
 </ul>
 <p><code><a href="reference/normalize_elected.html">normalize_elected()</a></code> is the function that builds the yearly files and is exported, so the same rules can be applied to a fresh TSE download (for example from <code>electionsBR</code>).</p>
+<div class="section level3">
+<h3 id="who-holds-the-office-on-a-given-date">Who holds the office on a given date?<a class="anchor" aria-label="anchor" href="#who-holds-the-office-on-a-given-date"></a>
+</h3>
+<p>The TSE files describe the poll and never change afterwards. Resignations, deaths, removals and successions are recorded in a small curated table, <code><a href="reference/get_officeholding_events.html">get_officeholding_events()</a></code>, served next to the yearly files and updated on demand (every row cites its source; pull requests are welcome). <code>as_of</code> applies it:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Recife: the mayor elected in 2024 resigned on 2026-04-02 to run for</span></span>
+<span><span class="co"># governor; the vice mayor took office on 2026-04-06</span></span>
+<span><span class="fu"><a href="reference/get_elected.html">get_elected</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"PE"</span>, municipality <span class="op">=</span> <span class="st">"Recife"</span>,</span>
+<span>            office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mayor"</span>, <span class="st">"vice_mayor"</span><span class="op">)</span>, as_of <span class="op">=</span> <span class="st">"2026-06-01"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; status_as_of: "resignation" for the mayor, "succession" for the vice mayor,</span></span>
+<span><span class="co">#&gt; whose office_as_of becomes "mayor"</span></span></code></pre></div>
+<p>An official without a recorded event gets <code>status_as_of = "no_change_recorded"</code>, which means exactly that, not that they are in office.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="sitting-members-of-congress">Sitting members of Congress<a class="anchor" aria-label="anchor" href="#sitting-members-of-congress"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/get_deputies.html">get_senators</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"PE"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_deputies.html">get_deputies</a></span><span class="op">(</span>state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PE"</span>, <span class="st">"PB"</span><span class="op">)</span>, party <span class="op">=</span> <span class="st">"PSB"</span>, role <span class="op">=</span> <span class="st">"alternate"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_deputies.html">consultar_deputados</a></span><span class="op">(</span>uf <span class="op">=</span> <span class="st">"PE"</span>, condicao <span class="op">=</span> <span class="st">"suplente"</span><span class="op">)</span></span>
@@ -160,6 +174,10 @@
 <td><code><a href="reference/get_service_history.html">consultar_historico_exercicio()</a></code></td>
 </tr>
 <tr>
+<td><code><a href="reference/get_officeholding_events.html">get_officeholding_events()</a></code></td>
+<td><code><a href="reference/get_officeholding_events.html">consultar_eventos_exercicio()</a></code></td>
+</tr>
+<tr>
 <td>
 <code><a href="reference/normalize_elected.html">normalize_elected()</a></code>, <code><a href="reference/elected_clear_cache.html">elected_clear_cache()</a></code>
 </td>
@@ -185,6 +203,14 @@
 </tr>
 <tr>
 <td>
+<code>as_of</code>, <code>events</code>
+</td>
+<td>
+<code>data_referencia</code>, <code>eventos</code>
+</td>
+</tr>
+<tr>
+<td>
 <code>status = "serving"</code>, <code>role = "principal"/"alternate"</code>
 </td>
 <td>
@@ -199,7 +225,7 @@
 <h2 id="data-sources">Data sources<a class="anchor" aria-label="anchor" href="#data-sources"></a>
 </h2>
 <ul>
-<li>TSE, <em>Resultados</em>: <a href="https://dadosabertos.tse.jus.br/dataset/resultados-2024" class="external-link uri">https://dadosabertos.tse.jus.br/dataset/resultados-2024</a> (and 2018, 2020, 2022). Yearly files: <a href="https://huggingface.co/datasets/mlkwy/electedBR" class="external-link uri">https://huggingface.co/datasets/mlkwy/electedBR</a>.</li>
+<li>TSE, <em>Resultados</em> and <em>Candidatos</em>: <a href="https://dadosabertos.tse.jus.br/dataset/resultados-2024" class="external-link uri">https://dadosabertos.tse.jus.br/dataset/resultados-2024</a>, <a href="https://dadosabertos.tse.jus.br/dataset/candidatos-2024" class="external-link uri">https://dadosabertos.tse.jus.br/dataset/candidatos-2024</a> (and 2018, 2020, 2022). Yearly files and events table: <a href="https://huggingface.co/datasets/mlkwy/electedBR" class="external-link uri">https://huggingface.co/datasets/mlkwy/electedBR</a>.</li>
 <li>Chamber of Deputies open data API: <a href="https://dadosabertos.camara.leg.br/swagger/api.html" class="external-link uri">https://dadosabertos.camara.leg.br/swagger/api.html</a>
 </li>
 <li>Federal Senate open data: <a href="https://legis.senado.leg.br/dadosabertos/" class="external-link uri">https://legis.senado.leg.br/dadosabertos/</a>
@@ -219,7 +245,7 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"electedBR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">

@@ -11,9 +11,12 @@ Who was elected in each poll, from the TSE open data.
   [`consultar_prefeitos()`](https://strategicprojects.github.io/electedBR/reference/get_elected.md)
   [`consultar_vereadores()`](https://strategicprojects.github.io/electedBR/reference/get_elected.md)
   : Candidates elected in Brazilian elections
+- [`get_officeholding_events()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md)
+  [`consultar_eventos_exercicio()`](https://strategicprojects.github.io/electedBR/reference/get_officeholding_events.md)
+  : Office-holding events for elected officials
 - [`normalize_elected()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md)
   [`normalizar_eleitos()`](https://strategicprojects.github.io/electedBR/reference/normalize_elected.md)
-  : Consolidate TSE vote records into the candidates elected
+  : Consolidate TSE files into the candidates elected
 - [`elected_years`](https://strategicprojects.github.io/electedBR/reference/elected_years.md)
   : Yearly files of elected candidates
 

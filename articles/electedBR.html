@@ -92,23 +92,23 @@ directory; here we use a temporary directory instead.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">elected_years</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"year"</span>, <span class="st">"kind"</span>, <span class="st">"rows"</span>, <span class="st">"built"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;   year      kind   rows      built</span></span>
-<span><span class="co">#&gt; 1 2018   general  20170 2026-09-25</span></span>
-<span><span class="co">#&gt; 2 2020 municipal 375733 2026-09-25</span></span>
-<span><span class="co">#&gt; 3 2022   general  16268 2026-09-25</span></span>
-<span><span class="co">#&gt; 4 2024 municipal 300459 2026-09-25</span></span>
+<span><span class="co">#&gt; 1 2018   general  20226 2026-09-25</span></span>
+<span><span class="co">#&gt; 2 2020 municipal 381334 2026-09-25</span></span>
+<span><span class="co">#&gt; 3 2022   general  16324 2026-09-25</span></span>
+<span><span class="co">#&gt; 4 2024 municipal 306023 2026-09-25</span></span>
 <span><span class="va">cache</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Mayors elected in two municipalities of Pernambuco in 2024:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_elected.html">get_mayors</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"PE"</span>, municipality <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Recife"</span>, <span class="st">"Caruaru"</span><span class="op">)</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Downloading elected_2024.parquet from https://huggingface.co/datasets/mlkwy/electedBR/resolve/main/elected_2024.parquet</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 14</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 15</span></span>
 <span><span class="co">#&gt;    year election_id round state municipality_tse_id municipality office</span></span>
 <span><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt;               &lt;chr&gt;        &lt;chr&gt; </span></span>
 <span><span class="co">#&gt; 1  2024 619             1 PE    23817               CARUARU      mayor </span></span>
 <span><span class="co">#&gt; 2  2024 619             1 PE    25313               RECIFE       mayor </span></span>
-<span><span class="co">#&gt; # ℹ 7 more variables: candidate_id &lt;chr&gt;, name &lt;chr&gt;, ballot_name &lt;chr&gt;,</span></span>
-<span><span class="co">#&gt; #   party_at_election &lt;chr&gt;, election_status &lt;chr&gt;, votes &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   reference &lt;chr&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; # ℹ 8 more variables: candidate_id &lt;chr&gt;, ticket_candidate_id &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   name &lt;chr&gt;, ballot_name &lt;chr&gt;, party_at_election &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   election_status &lt;chr&gt;, votes &lt;dbl&gt;, reference &lt;chr&gt;</span></span></code></pre></div>
 <p>Municipalities are matched by name (ignoring accents and case) or by
 their TSE code. Councilors of a municipality, by party, with the
 alternates classified by the TSE:</p>
@@ -119,22 +119,34 @@ alternates classified by the TSE:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ELEITO POR MÉDIA    ELEITO POR QP         SUPLENTE </span></span>
 <span><span class="co">#&gt;                6               31              356</span></span></code></pre></div>
-<p>General elections (2018, 2022) hold the statewide offices; votes are
-summed over every municipality and the municipal columns are
-<code>NA</code>:</p>
+<p>General elections (2018, 2022) hold the statewide and nationwide
+offices; votes are summed over every municipality (and, for president,
+every state) and the municipal columns are <code>NA</code>. Running
+mates have no votes of their own and are linked to the head of their
+ticket by <code>ticket_candidate_id</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"PE"</span>, office <span class="op">=</span> <span class="st">"senator"</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pe22</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"PE"</span>, office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"governor"</span>, <span class="st">"vice_governor"</span><span class="op">)</span>,</span>
+<span>                    cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Downloading elected_2022.parquet from https://huggingface.co/datasets/mlkwy/electedBR/resolve/main/elected_2022.parquet</span></span>
-<span><span class="co">#&gt; # A tibble: 1 × 14</span></span>
+<span><span class="va">pe22</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"office"</span>, <span class="st">"candidate_id"</span>, <span class="st">"ticket_candidate_id"</span>, <span class="st">"ballot_name"</span>,</span>
+<span>         <span class="st">"party_at_election"</span>, <span class="st">"votes"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 6</span></span>
+<span><span class="co">#&gt;   office  candidate_id ticket_candidate_id ballot_name party_at_election   votes</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;        &lt;chr&gt;               &lt;chr&gt;       &lt;chr&gt;               &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 govern… 170001604087 &lt;NA&gt;                RAQUEL LYRA PSDB              3113415</span></span>
+<span><span class="co">#&gt; 2 vice_g… 170001728608 170001604087        PRISCILA K… CIDADANIA              NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"PE"</span>, office <span class="op">=</span> <span class="st">"senator"</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 15</span></span>
 <span><span class="co">#&gt;    year election_id round state municipality_tse_id municipality office </span></span>
 <span><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt;               &lt;chr&gt;        &lt;chr&gt;  </span></span>
 <span><span class="co">#&gt; 1  2022 546             1 PE    &lt;NA&gt;                &lt;NA&gt;         senator</span></span>
-<span><span class="co">#&gt; # ℹ 7 more variables: candidate_id &lt;chr&gt;, name &lt;chr&gt;, ballot_name &lt;chr&gt;,</span></span>
-<span><span class="co">#&gt; #   party_at_election &lt;chr&gt;, election_status &lt;chr&gt;, votes &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   reference &lt;chr&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; # ℹ 8 more variables: candidate_id &lt;chr&gt;, ticket_candidate_id &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   name &lt;chr&gt;, ballot_name &lt;chr&gt;, party_at_election &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   election_status &lt;chr&gt;, votes &lt;dbl&gt;, reference &lt;chr&gt;</span></span></code></pre></div>
 <p>The Portuguese aliases accept the Portuguese office labels and return
 exactly the same tibble:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/get_elected.html">consultar_eleitos</a></span><span class="op">(</span><span class="fl">2022</span>, uf <span class="op">=</span> <span class="st">"PE"</span>, cargo <span class="op">=</span> <span class="st">"SENADOR"</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/get_elected.html">get_elected</a></span><span class="op">(</span><span class="fl">2022</span>, state <span class="op">=</span> <span class="st">"PE"</span>, office <span class="op">=</span> <span class="st">"senator"</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
@@ -143,6 +155,38 @@ exactly the same tibble:</p>
 <p>Results describe the poll: <code>party_at_election</code> is the
 party at the time of the election, and a candidate elected in 2022 is
 not necessarily in office today.</p>
+<div class="section level3">
+<h3 id="who-holds-the-office-on-a-given-date">Who holds the office on a given date?<a class="anchor" aria-label="anchor" href="#who-holds-the-office-on-a-given-date"></a>
+</h3>
+<p>Mayors and governors have no official API of sitting members. The
+package keeps a small curated table of office-holding events
+(resignations, deaths, removals, leaves and successions), each row
+citing its source, served next to the yearly files and updated on
+demand. <code>as_of</code> applies it. In Recife, the mayor elected in
+2024 resigned on 2026-04-02 to run for governor and the vice mayor took
+office on 2026-04-06:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">recife_ticket</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_elected.html">get_elected</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"PE"</span>, municipality <span class="op">=</span> <span class="st">"Recife"</span>,</span>
+<span>                             office <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mayor"</span>, <span class="st">"vice_mayor"</span><span class="op">)</span>,</span>
+<span>                             as_of <span class="op">=</span> <span class="st">"2026-06-01"</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
+<span><span class="va">recife_ticket</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"office"</span>, <span class="st">"ballot_name"</span>, <span class="st">"status_as_of"</span>, <span class="st">"status_date"</span>,</span>
+<span>                  <span class="st">"office_as_of"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 5</span></span>
+<span><span class="co">#&gt;   office     ballot_name    status_as_of status_date office_as_of</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;        &lt;date&gt;      &lt;chr&gt;       </span></span>
+<span><span class="co">#&gt; 1 mayor      JOÃO CAMPOS    resignation  2026-04-02  mayor       </span></span>
+<span><span class="co">#&gt; 2 vice_mayor VICTOR MARQUES succession   2026-04-06  mayor</span></span></code></pre></div>
+<p><code>no_change_recorded</code> means exactly that: nothing has been
+recorded for the official, which is not evidence of being in office. The
+table itself:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_officeholding_events.html">get_officeholding_events</a></span><span class="op">(</span>cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"office"</span>, <span class="st">"event"</span>, <span class="st">"date"</span>,</span>
+<span>                                                <span class="st">"successor_name"</span>, <span class="st">"successor_date"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 6</span></span>
+<span><span class="co">#&gt;   name                     office event date       successor_name successor_date</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;                    &lt;chr&gt;  &lt;chr&gt; &lt;date&gt;     &lt;chr&gt;          &lt;date&gt;        </span></span>
+<span><span class="co">#&gt; 1 JOÃO HENRIQUE DE ANDRAD… mayor  resi… 2026-04-02 VICTOR MARQUE… 2026-04-06</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="sitting-members-of-congress">Sitting members of Congress<a class="anchor" aria-label="anchor" href="#sitting-members-of-congress"></a>
@@ -151,7 +195,7 @@ not necessarily in office today.</p>
 for six hours. <code>mandate_role</code> (principal or alternate) is
 kept separate from <code>exercise_status</code>, so alternates currently
 serving are listed.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_deputies.html">get_senators</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"PE"</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
 <span><span class="va">pe</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person_id"</span>, <span class="st">"name"</span>, <span class="st">"current_party"</span>, <span class="st">"mandate_role"</span>, <span class="st">"exercise_start"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; # A tibble: 3 × 5</span></span>
@@ -164,7 +208,7 @@ serving are listed.</p>
 <code>camara:</code>) and is the key for the service history. The Senate
 publishes service periods; the Chamber publishes status records, and the
 package does not turn one into the other.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_service_history.html">get_service_history</a></span><span class="op">(</span><span class="va">pe</span><span class="op">$</span><span class="va">person_id</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, cache_dir <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
 <span><span class="va">h</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mandate_id"</span>, <span class="st">"record_type"</span>, <span class="st">"exercise_start"</span>, <span class="st">"exercise_end"</span>, <span class="st">"description"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; # A tibble: 2 × 5</span></span>
