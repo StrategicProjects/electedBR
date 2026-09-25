@@ -2,9 +2,9 @@
 
 This is a resubmission. In this version I have:
 
-* Replaced the relative link to `CODE_OF_CONDUCT.md` in `README.md` with the
-  absolute URL of the file on GitHub, as requested (the file is not part of
-  the tarball, so the relative URI was invalid).
+* Removed the "Code of conduct" section of `README.md`, whose relative link
+  to `CODE_OF_CONDUCT.md` was reported as a possibly invalid file URI (the
+  file was not part of the tarball).
 
 ## Initial submission
 
