@@ -5,8 +5,8 @@ First CRAN release.
 * Election results are read from yearly Parquet files derived from the TSE
   open data and hosted on Hugging Face
   (<https://huggingface.co/datasets/mlkwy/electedBR>), indexed by the new
-  `elected_years` dataset. The first query for a year downloads a few
-  megabytes into the user cache; `electionsBR` is no longer a dependency and
+  `elected_years` dataset. The first query for a year downloads 1 to 25 MB
+  into the user cache; `electionsBR` is no longer a dependency and
   the multi-hundred-megabyte TSE downloads are gone. `normalize_elected()`
   remains exported and is the function that builds those files.
 * `get_elected()` covers mayors, deputy mayors and councilors (2020, 2024) and

@@ -87,7 +87,9 @@ only.}
 
 \item{office}{One or more of \code{"mayor"}, \code{"deputy_mayor"}, \code{"councilor"},
 \code{"senator"}, \code{"federal_deputy"}, \code{"state_deputy"} and
-\code{"district_deputy"}. \code{NULL} keeps every office in the year.}
+\code{"district_deputy"}. \code{NULL} keeps every office in the year. The TSE vote
+files list no votes for deputy mayors (they run on the mayor's ticket), so
+\code{"deputy_mayor"} currently returns no rows.}
 
 \item{party}{Party abbreviations at the time of the election.}
 
@@ -127,8 +129,9 @@ data and hosted by the package (see \link{elected_years}). Municipal offices
 district deputy) for general election years (2018, 2022, ...).
 }
 \details{
-The first call for a year downloads its Parquet file (a few megabytes) into
-\code{cache_dir}; later calls read the local copy. Results describe who was
+The first call for a year downloads its Parquet file (about 1 MB for a
+general election, up to 25 MB for a municipal one, see \code{elected_years$bytes})
+into \code{cache_dir}; later calls read the local copy. Results describe who was
 elected in the poll: they do not establish who currently holds office nor
 current party membership. For sitting members of Congress use
 \code{\link[=get_deputies]{get_deputies()}} and \code{\link[=get_senators]{get_senators()}}.

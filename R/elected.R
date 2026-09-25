@@ -7,8 +7,9 @@
 #' (2020, 2024, ...) and legislative offices (senator, federal, state and
 #' district deputy) for general election years (2018, 2022, ...).
 #'
-#' The first call for a year downloads its Parquet file (a few megabytes) into
-#' `cache_dir`; later calls read the local copy. Results describe who was
+#' The first call for a year downloads its Parquet file (about 1 MB for a
+#' general election, up to 25 MB for a municipal one, see `elected_years$bytes`)
+#' into `cache_dir`; later calls read the local copy. Results describe who was
 #' elected in the poll: they do not establish who currently holds office nor
 #' current party membership. For sitting members of Congress use
 #' [get_deputies()] and [get_senators()].
@@ -21,7 +22,9 @@
 #'   only.
 #' @param office One or more of `"mayor"`, `"deputy_mayor"`, `"councilor"`,
 #'   `"senator"`, `"federal_deputy"`, `"state_deputy"` and
-#'   `"district_deputy"`. `NULL` keeps every office in the year.
+#'   `"district_deputy"`. `NULL` keeps every office in the year. The TSE vote
+#'   files list no votes for deputy mayors (they run on the mayor's ticket), so
+#'   `"deputy_mayor"` currently returns no rows.
 #' @param party Party abbreviations at the time of the election.
 #' @param include_alternates Logical. Also return the candidates classified as
 #'   `SUPLENTE` (alternate) in the TSE file. This is the classification at the
