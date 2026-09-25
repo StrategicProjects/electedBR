@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 690" width="1000" height="690" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12.5">
+  <title>electedBR architecture</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4a5a6a"/>
+    </marker>
+    <style>
+      .box { stroke-width: 1.5; rx: 8; }
+      .src { fill: #fff7e6; stroke: #d98e04; }
+      .etl { fill: #eef6ff; stroke: #1e6fa0; }
+      .host { fill: #fff3f0; stroke: #cb4335; }
+      .pkg { fill: #f0faf3; stroke: #27ae60; }
+      .out { fill: #0d3b66; stroke: #082845; }
+      .lbl { fill: #1f2d3d; }
+      .code { fill: #1f2d3d; font-family: Menlo, Consolas, monospace; font-size: 11px; }
+      .sub { fill: #5b6b7b; font-size: 11px; }
+      .title { fill: #0d3b66; font-weight: 700; font-size: 14px; }
+      .flow { fill: none; stroke: #4a5a6a; stroke-width: 1.6; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 5 4; }
+      .lane { fill: none; stroke: #c9d4e2; stroke-dasharray: 3 5; }
+      .lanet { fill: #7a8a9a; font-size: 11px; letter-spacing: 1.5px; }
+      .white { fill: #ffffff; }
+      .pale { fill: #dfe8f2; }
+    </style>
+  </defs>
+
+  <!-- Lanes -->
+  <text x="20" y="24" class="lanet">SOURCES</text>
+  <text x="295" y="24" class="lanet">BUILD · data-raw/, on demand</text>
+  <text x="575" y="24" class="lanet">HOSTING</text>
+  <text x="775" y="24" class="lanet">PACKAGE · R</text>
+  <line x1="275" y1="32" x2="275" y2="630" class="lane"/>
+  <line x1="555" y1="32" x2="555" y2="630" class="lane"/>
+  <line x1="755" y1="32" x2="755" y2="630" class="lane"/>
+
+  <!-- Sources -->
+  <rect x="20" y="45" width="240" height="92" class="box src"/>
+  <text x="32" y="66" class="title">TSE open data</text>
+  <text x="32" y="86" class="code">votacao_candidato_munzona_YYYY.zip</text>
+  <text x="32" y="103" class="code">consulta_cand_YYYY.zip</text>
+  <text x="32" y="124" class="sub">CDN refuses non-browser clients</text>
+
+  <rect x="20" y="165" width="240" height="66" class="box src"/>
+  <text x="32" y="186" class="title">Official and press records</text>
+  <text x="32" y="205" class="lbl">resignations, deaths, successions</text>
+  <text x="32" y="222" class="sub">every row cites its source</text>
+
+  <rect x="20" y="420" width="240" height="96" class="box src"/>
+  <text x="32" y="441" class="title">Congress open data APIs</text>
+  <text x="32" y="461" class="code">dadosabertos.camara.leg.br/api/v2</text>
+  <text x="32" y="478" class="code">legis.senado.leg.br/dadosabertos</text>
+  <text x="32" y="500" class="sub">members in service, status records</text>
+
+  <!-- Build -->
+  <rect x="295" y="45" width="245" height="112" class="box etl"/>
+  <text x="307" y="66" class="title">build_elected.R</text>
+  <text x="307" y="85" class="code">normalize_elected(votes, cand)</text>
+  <text x="307" y="103" class="sub">sum zones · keep last round and election_id</text>
+  <text x="307" y="118" class="sub">running mates linked to the elected head</text>
+  <text x="307" y="133" class="sub">alternates kept (SUPLENTE)</text>
+  <text x="307" y="150" class="code">→ elected_YYYY.parquet</text>
+
+  <rect x="295" y="180" width="245" height="66" class="box etl"/>
+  <text x="307" y="201" class="title">officeholding_events.csv</text>
+  <text x="307" y="220" class="lbl">curated in the repository, versioned</text>
+  <text x="307" y="237" class="sub">refreshed on demand, not on a schedule</text>
+
+  <rect x="295" y="275" width="245" height="54" class="box etl"/>
+  <text x="307" y="296" class="title">elected_years.R</text>
+  <text x="307" y="316" class="sub">index: year, url, bytes, md5, rows, built</text>
+
+  <!-- Hosting -->
+  <rect x="575" y="45" width="170" height="130" class="box host"/>
+  <text x="587" y="66" class="title">Hugging Face</text>
+  <text x="587" y="83" class="sub">datasets/mlkwy/electedBR</text>
+  <text x="587" y="104" class="code">elected_2018.parquet</text>
+  <text x="587" y="120" class="code">… elected_2024.parquet</text>
+  <text x="587" y="140" class="code">officeholding_events.csv</text>
+  <text x="587" y="162" class="sub">1 to 25 MB per year</text>
+
+  <rect x="575" y="275" width="170" height="54" class="box host"/>
+  <text x="587" y="296" class="title">elected_years</text>
+  <text x="587" y="316" class="sub">dataset shipped in the package</text>
+
+  <rect x="575" y="560" width="165" height="70" class="box out"/>
+  <text x="587" y="582" class="white" font-weight="700" font-size="14">tibbles</text>
+  <text x="587" y="601" class="pale">English columns</text>
+  <text x="587" y="618" class="pale">consultar_* aliases (pt)</text>
+
+  <!-- Package -->
+  <rect x="775" y="45" width="205" height="130" class="box pkg"/>
+  <text x="787" y="66" class="title">get_elected()</text>
+  <text x="787" y="83" class="sub">get_mayors(), get_councilors()</text>
+  <text x="787" y="104" class="lbl">nanoparquet · size and MD5 checks</text>
+  <text x="787" y="121" class="lbl">cache in tools::R_user_dir()</text>
+  <text x="787" y="142" class="code">as_of → status_as_of</text>
+  <text x="787" y="162" class="sub">events applied up to a date</text>
+
+  <rect x="775" y="215" width="205" height="56" class="box pkg"/>
+  <text x="787" y="236" class="title">get_officeholding_events()</text>
+  <text x="787" y="256" class="sub">24 h cache · immutable snapshots</text>
+
+  <rect x="775" y="420" width="205" height="96" class="box pkg"/>
+  <text x="787" y="441" class="title">get_deputies(), get_senators()</text>
+  <text x="787" y="459" class="title">get_service_history()</text>
+  <text x="787" y="480" class="lbl">httr2 · 6 h cache · snapshots</text>
+  <text x="787" y="500" class="sub">no stale data on a failed collection</text>
+
+  <!-- Flows: build time -->
+  <path d="M260 91 H295" class="flow"/>
+  <path d="M260 198 H295 V213" class="flow" style="marker-end:none"/>
+  <path d="M275 213 H295" class="flow"/>
+  <path d="M540 101 H575" class="flow"/>
+  <path d="M540 213 H557 V140 H575" class="flow"/>
+  <path d="M540 302 H575" class="flow"/>
+
+  <!-- Flows: query time -->
+  <path d="M745 110 H775" class="flow"/>
+  <path d="M745 140 H757 V243 H775" class="flow"/>
+  <path d="M745 302 H765 V110" class="flow dash" style="marker-end:none"/>
+  <path d="M877 215 V175" class="flow"/>
+  <path d="M260 468 H775" class="flow"/>
+
+  <!-- Output -->
+  <path d="M775 150 H762 V595 H740" class="flow"/>
+  <path d="M775 490 H762" class="flow" style="marker-end:none"/>
+
+  <!-- Legend -->
+  <text x="20" y="655" class="sub">Arrows: data flow at build time (left) and at query time (right). Dashed: the shipped index tells get_elected() where each yearly file lives and how to verify it.</text>
+  <text x="20" y="673" class="sub">Who was elected (TSE files) and who is serving (Congress APIs, curated events) are separate questions by design; the package never infers one from the other.</text>
+</svg>

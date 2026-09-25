@@ -3,7 +3,9 @@
 <!-- badges: start -->
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/electedBR)
+![devel version](https://img.shields.io/badge/devel%20version-0.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3-blue.svg)
+[![Data on Hugging Face](https://img.shields.io/badge/data-Hugging%20Face-yellow.svg)](https://huggingface.co/datasets/mlkwy/electedBR)
 [![R-CMD-check](https://github.com/StrategicProjects/electedBR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StrategicProjects/electedBR/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/StrategicProjects/electedBR/graph/badge.svg)](https://app.codecov.io/gh/StrategicProjects/electedBR)
 [![Documentation](https://img.shields.io/badge/docs-pkgdown-blue)](https://strategicprojects.github.io/electedBR/)
@@ -150,6 +152,16 @@ consultar_historico_exercicio("camara:204379")
 | `status = "serving"`, `role = "principal"/"alternate"` | `situacao = "em_exercicio"`, `condicao = "titular"/"suplente"` |
 
 Both interfaces return the same tibbles, with English columns.
+
+## Architecture
+
+<img src="man/figures/architecture.svg" alt="electedBR architecture: TSE files are consolidated on demand into yearly Parquet files hosted on Hugging Face and read by get_elected(); a curated events table is applied with as_of; Congress APIs are queried live by get_deputies(), get_senators() and get_service_history(); everything returns tibbles with Portuguese aliases" width="100%" />
+
+Election results are built on demand from the TSE files (which change only
+when the TSE publishes or revises them) and hosted outside the package;
+office-holding changes live in a curated table that can be refreshed without
+a package release; sitting members of Congress are queried live with a short
+cache. The three never feed each other.
 
 ## Data sources
 
