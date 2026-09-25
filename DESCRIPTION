@@ -1,0 +1,50 @@
+Package: electedBR
+Title: Brazilian Election Winners and Sitting Members of Congress
+Version: 0.1.0
+Authors@R: c(
+    person("Andre", "Leite", email = "leite@castlab.org", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-4718-9766")),
+    person("Marcos", "Wasiliew", email = "marcos.wasilew@gmail.com", role = "aut",
+           comment = c(ORCID = "0009-0004-4694-3159")),
+    person("Hugo", "Vasconcelos", email = "hugo.vasconcelos@ufpe.br", role = "aut",
+           comment = c(ORCID = "0000-0001-6249-0920")),
+    person("Carlos", "Amorim", email = "carlos.agaf@ufpe.br", role = "aut",
+           comment = c(ORCID = "0000-0001-6315-8305")),
+    person("Diogo", "Bezerra", email = "diogo.bezerra@ufpe.br", role = "aut",
+           comment = c(ORCID = "0000-0002-1216-8674")))
+Description: Retrieves the candidates elected in Brazilian municipal and general
+    elections since 2018, consolidated from the open data of the Superior
+    Electoral Court ('TSE', <https://dadosabertos.tse.jus.br/>) and distributed
+    as yearly 'Parquet' files, together with the federal deputies and senators
+    currently serving according to the open data 'APIs' of the Chamber of
+    Deputies (<https://dadosabertos.camara.leg.br/>) and the Federal Senate
+    (<https://www12.senado.leg.br/dados-abertos>). Election results and current
+    office holding are kept as distinct queries; electoral roles, service
+    history and provenance are preserved. Every function returns a tibble with
+    English column names and has a Portuguese alias.
+License: GPL-3
+URL: https://github.com/StrategicProjects/electedBR,
+    https://strategicprojects.github.io/electedBR/
+BugReports: https://github.com/StrategicProjects/electedBR/issues
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.1.0)
+Imports:
+    dplyr (>= 1.1.0),
+    httr2 (>= 1.0.0),
+    nanoparquet,
+    rlang,
+    tibble,
+    tools,
+    utils
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

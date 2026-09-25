@@ -1,0 +1,40 @@
+.DS_Store
+
+# Claude Code: local guidance and memory (not for the repo)
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+
+# History and session files
+.Rhistory
+.Rapp.history
+.RData
+.RDataTmp
+.Ruserdata
+
+# R CMD build / check
+*-Ex.R
+/*.tar.gz
+/*.Rcheck/
+
+# RStudio
+.Rproj.user/
+
+# pkgdown site (built by GitHub Actions)
+docs/
+
+# Raw TSE downloads and generated parquet files (hosted on Hugging Face)
+data-raw/tse/
+data-raw/parquet/
+
+# Secrets
+.env
+.Renviron
+
+# knitr / rmarkdown
+vignettes/*.html
+vignettes/*.R
+!vignettes/precompile.R
+*_cache/
+*.utf8.md
+*.knit.md

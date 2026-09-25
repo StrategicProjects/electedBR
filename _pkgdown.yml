@@ -1,0 +1,45 @@
+url: https://strategicprojects.github.io/electedBR/
+
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+  bslib:
+    primary: "#0d3b66"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+
+home:
+  title: "electedBR: Brazilian Election Winners and Sitting Members of Congress"
+  description: >
+    Candidates elected in Brazilian municipal and general elections (TSE open
+    data) and the federal deputies and senators currently serving (Chamber and
+    Senate open data APIs), as tidy tibbles with Portuguese aliases.
+
+reference:
+  - title: "Election results"
+    desc: "Who was elected in each poll, from the TSE open data."
+    contents:
+      - get_elected
+      - normalize_elected
+      - elected_years
+
+  - title: "Sitting members of Congress"
+    desc: "Current composition of the Chamber of Deputies and the Federal Senate."
+    contents:
+      - get_deputies
+      - get_service_history
+
+  - title: "Utilities"
+    contents:
+      - elected_clear_cache
+      - electedBR-package
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with

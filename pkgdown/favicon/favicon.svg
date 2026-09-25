@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 231" width="200" height="231"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d3b66"></stop>
+      <stop offset="100%" stop-color="#1e6fa0"></stop>
+    </linearGradient>
+    <linearGradient id="box" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4f7fb"></stop>
+      <stop offset="100%" stop-color="#d6e0ec"></stop>
+    </linearGradient>
+    <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"></stop>
+      <stop offset="100%" stop-color="#e3eaf3"></stop>
+    </linearGradient>
+    <linearGradient id="check" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#27ae60"></stop>
+      <stop offset="100%" stop-color="#58d68d"></stop>
+    </linearGradient>
+    <clipPath id="hexclip">
+      <path d="M100 2 194 52 V152 L100 202 6 152 V52 Z"></path>
+    </clipPath>
+  </defs><path d="M100 2 194 52 V152 L100 202 6 152 V52 Z" fill="url(#bg)" stroke="#082845" stroke-width="3"></path><g clip-path="url(#hexclip)" stroke="#ffffff" stroke-opacity="0.07" stroke-width="0.6">
+    <line x1="0" y1="50" x2="200" y2="50"></line>
+    <line x1="0" y1="80" x2="200" y2="80"></line>
+    <line x1="0" y1="110" x2="200" y2="110"></line>
+    <line x1="0" y1="140" x2="200" y2="140"></line>
+  </g><g transform="translate(0,-8)">
+    <!-- shadow -->
+    <rect x="58" y="86" width="84" height="56" rx="6" fill="#000000" opacity="0.18" transform="translate(3,4)"></rect>
+    <!-- body -->
+    <rect x="58" y="86" width="84" height="56" rx="6" fill="url(#box)"></rect>
+    <!-- horizontal band (Brazilian green) -->
+    <rect x="58" y="112" width="84" height="8" fill="#27ae60" opacity="0.85"></rect>
+    <!-- lid -->
+    <rect x="52" y="78" width="96" height="14" rx="4" fill="url(#lid)"></rect>
+    <!-- slot -->
+    <rect x="80" y="83" width="40" height="4" rx="2" fill="#0d3b66"></rect>
+    <!-- ballot paper, half inserted, tilted -->
+    <g transform="rotate(-12 100 70)">
+      <rect x="84" y="46" width="32" height="40" rx="2.5" fill="#ffffff" stroke="#c9d4e2" stroke-width="1"></rect>
+      <line x1="90" y1="56" x2="110" y2="56" stroke="#c9d4e2" stroke-width="2" stroke-linecap="round"></line>
+      <line x1="90" y1="64" x2="104" y2="64" stroke="#c9d4e2" stroke-width="2" stroke-linecap="round"></line>
+      <!-- check mark -->
+      <polyline points="90,74 96,80 110,66" fill="none" stroke="url(#check)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    </g>
+    <!-- yellow accent dot on the box (order/star) -->
+    <circle cx="100" cy="132" r="3.2" fill="#f7dc6f"></circle>
+  </g><text x="100" y="167" text-anchor="middle" font-family="'Fira Code', 'Menlo', 'Courier New', monospace" font-size="19" font-weight="700" fill="#ffffff" letter-spacing="0.5">electedBR</text></svg>
