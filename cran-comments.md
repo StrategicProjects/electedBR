@@ -1,3 +1,11 @@
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Replaced the relative link to `CODE_OF_CONDUCT.md` in `README.md` with the
+  absolute URL of the file on GitHub, as requested (the file is not part of
+  the tarball, so the relative URI was invalid).
+
 ## Initial submission
 
 This is the first submission of electedBR to CRAN.
