@@ -11,7 +11,11 @@ This is the first submission of electedBR to CRAN.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 0 notes locally and on GitHub Actions.
+
+win-builder (R-devel) reports 1 NOTE: "New submission", plus the possibly
+misspelled words TSE (the Superior Electoral Court's acronym) and tibble
+(the data structure returned by every function).
 
 ## Notes for the reviewers
 
