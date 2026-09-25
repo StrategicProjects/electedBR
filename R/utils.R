@@ -5,15 +5,26 @@
              "RO", "RR", "SC", "SP", "SE", "TO")
 .states_df <- sort(c(.states, "DF"))
 
-# Offices covered, keyed by the TSE `CD_CARGO` code used in the vote files.
-.offices <- c(`5` = "senator", `6` = "federal_deputy", `7` = "state_deputy",
-              `8` = "district_deputy", `11` = "mayor", `12` = "deputy_mayor",
-              `13` = "councilor")
-.municipal_offices <- c("mayor", "deputy_mayor", "councilor")
-.general_offices <- c("senator", "federal_deputy", "state_deputy", "district_deputy")
+# Offices covered, keyed by the TSE `CD_CARGO` code used in both the vote
+# files and the candidates file.
+.offices <- c(`1` = "president", `2` = "vice_president", `3` = "governor",
+              `4` = "vice_governor", `5` = "senator", `6` = "federal_deputy",
+              `7` = "state_deputy", `8` = "district_deputy", `11` = "mayor",
+              `12` = "vice_mayor", `13` = "councilor")
+.municipal_offices <- c("mayor", "vice_mayor", "councilor")
+.general_offices <- c("president", "vice_president", "governor", "vice_governor",
+                      "senator", "federal_deputy", "state_deputy", "district_deputy")
+# Running mates have no votes of their own: they come from the candidates
+# file, linked to the head of the ticket.
+.vice_offices <- c(vice_president = "president", vice_governor = "governor",
+                   vice_mayor = "mayor")
+# Nationwide offices carry no state.
+.national_offices <- c("president", "vice_president")
 
 # Portuguese office labels accepted by the `consultar_*()` aliases.
-.office_pt <- c(PREFEITO = "mayor", `VICE-PREFEITO` = "deputy_mayor",
+.office_pt <- c(PRESIDENTE = "president", `VICE-PRESIDENTE` = "vice_president",
+                GOVERNADOR = "governor", `VICE-GOVERNADOR` = "vice_governor",
+                PREFEITO = "mayor", `VICE-PREFEITO` = "vice_mayor",
                 VEREADOR = "councilor", SENADOR = "senator",
                 `DEPUTADO FEDERAL` = "federal_deputy",
                 `DEPUTADO ESTADUAL` = "state_deputy",

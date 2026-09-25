@@ -48,10 +48,47 @@ test_that("statewide votes aggregate across municipalities", {
   expect_equal(nrow(b), 2)
 })
 
-test_that("presidential and gubernatorial rows are dropped", {
+test_that("president has no state and governor no municipality; votes sum nationwide", {
   x <- tse_fixture()
-  x$CD_CARGO <- c("1", "3", "13", "13", "13")
-  expect_equal(nrow(normalize_elected(x)), 2)
+  x$CD_CARGO <- c("1", "1", "3", "3", "13")
+  x$SQ_CANDIDATO <- c("1", "1", "2", "2", "4")
+  x$NM_CANDIDATO <- x$NM_URNA_CANDIDATO <- c("A", "A", "B", "B", "D")
+  x$SG_PARTIDO <- c("PSB", "PSB", "PT", "PT", "PSD")
+  x$SG_UF <- c("PE", "SP", "PE", "PE", "PE")
+  x$CD_MUNICIPIO <- c("1", "2", "1", "3", "1")
+  x$DS_SIT_TOT_TURNO <- "ELEITO"
+  out <- normalize_elected(x)
+  p <- out[out$office == "president", ]
+  expect_equal(nrow(p), 1)
+  expect_true(is.na(p$state))
+  expect_equal(p$votes, 150)
+  g <- out[out$office == "governor", ]
+  expect_equal(nrow(g), 1)
+  expect_identical(g$state, "PE")
+  expect_true(is.na(g$municipality))
+  expect_equal(g$votes, 120)
+})
+
+test_that("running mates come from the candidates file, linked to the head of the ticket", {
+  out <- normalize_elected(tse_fixture(), cand_fixture())
+  expect_true("ticket_candidate_id" %in% names(out))
+  v <- out[out$office == "vice_mayor", ]
+  expect_equal(nrow(v), 1)
+  expect_identical(v$candidate_id, "9")
+  expect_identical(v$ticket_candidate_id, "1")
+  expect_true(is.na(v$votes))
+  expect_identical(v$municipality_tse_id, "25313")
+  expect_identical(v$party_at_election, "PC do B")
+  expect_true(all(is.na(out$ticket_candidate_id[out$office != "vice_mayor"])))
+  # a second-round row wins over the first-round one
+  cand <- cand_fixture()
+  r2 <- cand[cand$SQ_CANDIDATO %in% c("1", "9"), ]
+  r2$NR_TURNO <- 2
+  cand$DS_SIT_TOT_TURNO[cand$SQ_CANDIDATO %in% c("1", "9")] <- "2\u00ba TURNO"
+  out2 <- normalize_elected(tse_fixture(), rbind(cand, r2))
+  expect_equal(out2$round[out2$office == "vice_mayor"], 2L)
+  expect_error(normalize_elected(tse_fixture(), data.frame(a = 1)), "candidates layout")
+  expect_identical(out, normalizar_eleitos(tse_fixture(), cand_fixture()))
 })
 
 test_that("normalize_text strips accents and case", {

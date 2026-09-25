@@ -25,6 +25,7 @@ reference:
     desc: "Who was elected in each poll, from the TSE open data."
     contents:
       - get_elected
+      - get_officeholding_events
       - normalize_elected
       - elected_years
 

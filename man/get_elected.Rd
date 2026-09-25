@@ -18,6 +18,8 @@ get_elected(
   include_alternates = FALSE,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   refresh = FALSE,
+  as_of = NULL,
+  events = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -28,6 +30,8 @@ get_mayors(
   party = NULL,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   refresh = FALSE,
+  as_of = NULL,
+  events = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -51,6 +55,8 @@ consultar_eleitos(
   incluir_suplentes = FALSE,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   atualizar = FALSE,
+  data_referencia = NULL,
+  eventos = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -61,6 +67,8 @@ consultar_prefeitos(
   partido = NULL,
   cache_dir = tools::R_user_dir("electedBR", "cache"),
   atualizar = FALSE,
+  data_referencia = NULL,
+  eventos = NULL,
   base_url = getOption("electedBR.base_url")
 )
 
@@ -79,17 +87,19 @@ consultar_vereadores(
 \item{year}{Election year; one of \code{elected_years$year}.}
 
 \item{state}{One or more two-letter state abbreviations (\code{"PE"}, \code{"SP"}).
-\code{NULL} (the default) keeps every state.}
+\code{NULL} (the default) keeps every state. President and vice president
+rows carry no state and are dropped when \code{state} is given.}
 
 \item{municipality}{Municipality names (matched exactly, ignoring accents
 and case) or TSE municipality codes (not IBGE codes). Municipal offices
 only.}
 
-\item{office}{One or more of \code{"mayor"}, \code{"deputy_mayor"}, \code{"councilor"},
-\code{"senator"}, \code{"federal_deputy"}, \code{"state_deputy"} and
-\code{"district_deputy"}. \code{NULL} keeps every office in the year. The TSE vote
-files list no votes for deputy mayors (they run on the mayor's ticket), so
-\code{"deputy_mayor"} currently returns no rows.}
+\item{office}{One or more of \code{"president"}, \code{"vice_president"},
+\code{"governor"}, \code{"vice_governor"}, \code{"senator"}, \code{"federal_deputy"},
+\code{"state_deputy"}, \code{"district_deputy"}, \code{"mayor"}, \code{"vice_mayor"} and
+\code{"councilor"}. \code{NULL} keeps every office in the year. Running mates come
+from the TSE candidates file, have \code{votes = NA} and are linked to the head
+of their ticket by \code{ticket_candidate_id}.}
 
 \item{party}{Party abbreviations at the time of the election.}
 
@@ -102,31 +112,45 @@ the per-user cache directory returned by \code{\link[tools:R_user_dir]{tools::R_
 
 \item{refresh}{Logical. Download the file again even if a copy is cached.}
 
+\item{as_of}{Optional date (or string convertible with \code{\link[=as.Date]{as.Date()}}). When
+given, the office-holding events dated on or before it are applied and
+the columns \code{status_as_of}, \code{status_date}, \code{office_as_of} and
+\code{status_source} are added: \code{status_as_of} is the latest event recorded for
+the official (\code{resignation}, \code{death}, \code{removal}, \code{leave}, \code{return}),
+\code{succession} for a running mate who took over (with \code{office_as_of} set to
+the office assumed) or \code{no_change_recorded}.}
+
+\item{events}{Optional events table with the columns of
+\code{\link[=get_officeholding_events]{get_officeholding_events()}}, used instead of downloading it.}
+
 \item{base_url}{Optional base URL of a mirror hosting the files listed in
 \link{elected_years}. Defaults to \code{getOption("electedBR.base_url")}; when
 \code{NULL}, the \code{url} column of \link{elected_years} is used.}
 
-\item{ano, uf, municipio, cargo, partido, incluir_suplentes, atualizar}{Portuguese
-aliases of \code{year}, \code{state}, \code{municipality}, \code{office}, \code{party},
-\code{include_alternates} and \code{refresh}. \code{cargo} also accepts the Portuguese
-labels \code{"PREFEITO"}, \code{"VICE-PREFEITO"}, \code{"VEREADOR"}, \code{"SENADOR"},
-\code{"DEPUTADO FEDERAL"}, \code{"DEPUTADO ESTADUAL"} and \code{"DEPUTADO DISTRITAL"}.}
+\item{ano, uf, municipio, cargo, partido, incluir_suplentes, atualizar, data_referencia, eventos}{Portuguese aliases of \code{year}, \code{state}, \code{municipality}, \code{office}, \code{party},
+\code{include_alternates}, \code{refresh}, \code{as_of} and \code{events}. \code{cargo} also
+accepts the Portuguese labels \code{"PRESIDENTE"}, \code{"VICE-PRESIDENTE"},
+\code{"GOVERNADOR"}, \code{"VICE-GOVERNADOR"}, \code{"SENADOR"}, \code{"DEPUTADO FEDERAL"},
+\code{"DEPUTADO ESTADUAL"}, \code{"DEPUTADO DISTRITAL"}, \code{"PREFEITO"},
+\code{"VICE-PREFEITO"} and \code{"VEREADOR"}.}
 }
 \value{
 A tibble with the columns documented in \code{\link[=normalize_elected]{normalize_elected()}}:
 \code{year}, \code{election_id}, \code{round}, \code{state}, \code{municipality_tse_id},
-\code{municipality}, \code{office}, \code{candidate_id}, \code{name}, \code{ballot_name},
-\code{party_at_election}, \code{election_status}, \code{votes} and \code{reference}. An empty
-tibble with the same columns is returned when no row matches. The
+\code{municipality}, \code{office}, \code{candidate_id}, \code{ticket_candidate_id}, \code{name},
+\code{ballot_name}, \code{party_at_election}, \code{election_status}, \code{votes} and
+\code{reference}, plus the four \verb{*_as_of} columns when \code{as_of} is given. An
+empty tibble with the same columns is returned when no row matches. The
 attributes \code{source} (TSE dataset page) and \code{notice} are set.
 }
 \description{
 Returns the candidates elected (and optionally the alternates) in a
 Brazilian election year, from the yearly files derived from the TSE open
 data and hosted by the package (see \link{elected_years}). Municipal offices
-(mayor, deputy mayor, councilor) are available for municipal election years
-(2020, 2024, ...) and legislative offices (senator, federal, state and
-district deputy) for general election years (2018, 2022, ...).
+(mayor, vice mayor, councilor) are available for municipal election years
+(2020, 2024, ...) and president, vice president, governors, vice governors,
+senators and federal, state and district deputies for general election
+years (2018, 2022, ...).
 }
 \details{
 The first call for a year downloads its Parquet file (about 1 MB for a
@@ -134,7 +158,10 @@ general election, up to 25 MB for a municipal one, see \code{elected_years$bytes
 into \code{cache_dir}; later calls read the local copy. Results describe who was
 elected in the poll: they do not establish who currently holds office nor
 current party membership. For sitting members of Congress use
-\code{\link[=get_deputies]{get_deputies()}} and \code{\link[=get_senators]{get_senators()}}.
+\code{\link[=get_deputies]{get_deputies()}} and \code{\link[=get_senators]{get_senators()}}; for mayors and governors, \code{as_of}
+applies the curated \code{\link[=get_officeholding_events]{get_officeholding_events()}} table (resignations,
+deaths, removals, leaves and successions), which records changes but does
+not prove that an official without a record is in office.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -146,6 +173,14 @@ get_mayors(state = "PE", municipality = c("Recife", "Caruaru"),
 get_elected(2022, state = "PE", office = "federal_deputy",
             include_alternates = TRUE, cache_dir = tempdir())
 
+# Governor and vice governor of Pernambuco elected in 2022
+get_elected(2022, state = "PE", office = c("governor", "vice_governor"),
+            cache_dir = tempdir())
+
+# Who holds the Recife mayoralty on a given date, after the 2026 resignation
+get_mayors(state = "PE", municipality = "Recife", as_of = "2026-06-01",
+           cache_dir = tempdir())
+
 # Same query through the Portuguese alias
 consultar_eleitos(2022, uf = "PE", cargo = "DEPUTADO FEDERAL",
                   cache_dir = tempdir())
@@ -153,5 +188,5 @@ consultar_eleitos(2022, uf = "PE", cargo = "DEPUTADO FEDERAL",
 }
 \seealso{
 \code{\link[=get_mayors]{get_mayors()}}, \code{\link[=get_councilors]{get_councilors()}}, \link{elected_years},
-\code{\link[=elected_clear_cache]{elected_clear_cache()}}.
+\code{\link[=get_officeholding_events]{get_officeholding_events()}}, \code{\link[=elected_clear_cache]{elected_clear_cache()}}.
 }

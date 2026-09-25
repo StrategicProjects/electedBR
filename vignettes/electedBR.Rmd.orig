@@ -56,8 +56,17 @@ recife <- get_councilors(state = "PE", municipality = "Recife",
 table(recife$election_status)
 ```
 
-General elections (2018, 2022) hold the statewide offices; votes are summed
-over every municipality and the municipal columns are `NA`:
+General elections (2018, 2022) hold the statewide and nationwide offices;
+votes are summed over every municipality (and, for president, every state)
+and the municipal columns are `NA`. Running mates have no votes of their own
+and are linked to the head of their ticket by `ticket_candidate_id`:
+
+```{r governor-2022}
+pe22 <- get_elected(2022, state = "PE", office = c("governor", "vice_governor"),
+                    cache_dir = cache)
+pe22[, c("office", "candidate_id", "ticket_candidate_id", "ballot_name",
+         "party_at_election", "votes")]
+```
 
 ```{r senators-2022}
 get_elected(2022, state = "PE", office = "senator", cache_dir = cache)
@@ -76,6 +85,31 @@ identical(
 Results describe the poll: `party_at_election` is the party at the time of
 the election, and a candidate elected in 2022 is not necessarily in office
 today.
+
+### Who holds the office on a given date?
+
+Mayors and governors have no official API of sitting members. The package
+keeps a small curated table of office-holding events (resignations, deaths,
+removals, leaves and successions), each row citing its source, served next
+to the yearly files and updated on demand. `as_of` applies it. In Recife,
+the mayor elected in 2024 resigned on 2026-04-02 to run for governor and the
+vice mayor took office on 2026-04-06:
+
+```{r recife-as-of}
+recife_ticket <- get_elected(state = "PE", municipality = "Recife",
+                             office = c("mayor", "vice_mayor"),
+                             as_of = "2026-06-01", cache_dir = cache)
+recife_ticket[, c("office", "ballot_name", "status_as_of", "status_date",
+                  "office_as_of")]
+```
+
+`no_change_recorded` means exactly that: nothing has been recorded for the
+official, which is not evidence of being in office. The table itself:
+
+```{r events}
+get_officeholding_events(cache_dir = cache)[, c("name", "office", "event", "date",
+                                                "successor_name", "successor_date")]
+```
 
 ## Sitting members of Congress
 

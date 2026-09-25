@@ -3,28 +3,34 @@
 #' Returns the candidates elected (and optionally the alternates) in a
 #' Brazilian election year, from the yearly files derived from the TSE open
 #' data and hosted by the package (see [elected_years]). Municipal offices
-#' (mayor, deputy mayor, councilor) are available for municipal election years
-#' (2020, 2024, ...) and legislative offices (senator, federal, state and
-#' district deputy) for general election years (2018, 2022, ...).
+#' (mayor, vice mayor, councilor) are available for municipal election years
+#' (2020, 2024, ...) and president, vice president, governors, vice governors,
+#' senators and federal, state and district deputies for general election
+#' years (2018, 2022, ...).
 #'
 #' The first call for a year downloads its Parquet file (about 1 MB for a
 #' general election, up to 25 MB for a municipal one, see `elected_years$bytes`)
 #' into `cache_dir`; later calls read the local copy. Results describe who was
 #' elected in the poll: they do not establish who currently holds office nor
 #' current party membership. For sitting members of Congress use
-#' [get_deputies()] and [get_senators()].
+#' [get_deputies()] and [get_senators()]; for mayors and governors, `as_of`
+#' applies the curated [get_officeholding_events()] table (resignations,
+#' deaths, removals, leaves and successions), which records changes but does
+#' not prove that an official without a record is in office.
 #'
 #' @param year Election year; one of `elected_years$year`.
 #' @param state One or more two-letter state abbreviations (`"PE"`, `"SP"`).
-#'   `NULL` (the default) keeps every state.
+#'   `NULL` (the default) keeps every state. President and vice president
+#'   rows carry no state and are dropped when `state` is given.
 #' @param municipality Municipality names (matched exactly, ignoring accents
 #'   and case) or TSE municipality codes (not IBGE codes). Municipal offices
 #'   only.
-#' @param office One or more of `"mayor"`, `"deputy_mayor"`, `"councilor"`,
-#'   `"senator"`, `"federal_deputy"`, `"state_deputy"` and
-#'   `"district_deputy"`. `NULL` keeps every office in the year. The TSE vote
-#'   files list no votes for deputy mayors (they run on the mayor's ticket), so
-#'   `"deputy_mayor"` currently returns no rows.
+#' @param office One or more of `"president"`, `"vice_president"`,
+#'   `"governor"`, `"vice_governor"`, `"senator"`, `"federal_deputy"`,
+#'   `"state_deputy"`, `"district_deputy"`, `"mayor"`, `"vice_mayor"` and
+#'   `"councilor"`. `NULL` keeps every office in the year. Running mates come
+#'   from the TSE candidates file, have `votes = NA` and are linked to the head
+#'   of their ticket by `ticket_candidate_id`.
 #' @param party Party abbreviations at the time of the election.
 #' @param include_alternates Logical. Also return the candidates classified as
 #'   `SUPLENTE` (alternate) in the TSE file. This is the classification at the
@@ -32,17 +38,27 @@
 #' @param cache_dir Directory where the yearly files are stored. Defaults to
 #'   the per-user cache directory returned by [tools::R_user_dir()].
 #' @param refresh Logical. Download the file again even if a copy is cached.
+#' @param as_of Optional date (or string convertible with [as.Date()]). When
+#'   given, the office-holding events dated on or before it are applied and
+#'   the columns `status_as_of`, `status_date`, `office_as_of` and
+#'   `status_source` are added: `status_as_of` is the latest event recorded for
+#'   the official (`resignation`, `death`, `removal`, `leave`, `return`),
+#'   `succession` for a running mate who took over (with `office_as_of` set to
+#'   the office assumed) or `no_change_recorded`.
+#' @param events Optional events table with the columns of
+#'   [get_officeholding_events()], used instead of downloading it.
 #' @param base_url Optional base URL of a mirror hosting the files listed in
 #'   [elected_years]. Defaults to `getOption("electedBR.base_url")`; when
 #'   `NULL`, the `url` column of [elected_years] is used.
 #' @return A tibble with the columns documented in [normalize_elected()]:
 #'   `year`, `election_id`, `round`, `state`, `municipality_tse_id`,
-#'   `municipality`, `office`, `candidate_id`, `name`, `ballot_name`,
-#'   `party_at_election`, `election_status`, `votes` and `reference`. An empty
-#'   tibble with the same columns is returned when no row matches. The
+#'   `municipality`, `office`, `candidate_id`, `ticket_candidate_id`, `name`,
+#'   `ballot_name`, `party_at_election`, `election_status`, `votes` and
+#'   `reference`, plus the four `*_as_of` columns when `as_of` is given. An
+#'   empty tibble with the same columns is returned when no row matches. The
 #'   attributes `source` (TSE dataset page) and `notice` are set.
 #' @seealso [get_mayors()], [get_councilors()], [elected_years],
-#'   [elected_clear_cache()].
+#'   [get_officeholding_events()], [elected_clear_cache()].
 #' @examplesIf interactive()
 #' # Mayors elected in Pernambuco in 2024
 #' get_mayors(state = "PE", municipality = c("Recife", "Caruaru"),
@@ -52,6 +68,14 @@
 #' get_elected(2022, state = "PE", office = "federal_deputy",
 #'             include_alternates = TRUE, cache_dir = tempdir())
 #'
+#' # Governor and vice governor of Pernambuco elected in 2022
+#' get_elected(2022, state = "PE", office = c("governor", "vice_governor"),
+#'             cache_dir = tempdir())
+#'
+#' # Who holds the Recife mayoralty on a given date, after the 2026 resignation
+#' get_mayors(state = "PE", municipality = "Recife", as_of = "2026-06-01",
+#'            cache_dir = tempdir())
+#'
 #' # Same query through the Portuguese alias
 #' consultar_eleitos(2022, uf = "PE", cargo = "DEPUTADO FEDERAL",
 #'                   cache_dir = tempdir())
@@ -59,7 +83,7 @@
 get_elected <- function(year = 2024L, state = NULL, municipality = NULL,
                         office = NULL, party = NULL, include_alternates = FALSE,
                         cache_dir = tools::R_user_dir("electedBR", "cache"),
-                        refresh = FALSE,
+                        refresh = FALSE, as_of = NULL, events = NULL,
                         base_url = getOption("electedBR.base_url")) {
   index <- .elected_index()
   year <- .check_year(year, index$year)
@@ -73,6 +97,11 @@ get_elected <- function(year = 2024L, state = NULL, municipality = NULL,
          "represent the whole state, filter them with `state`.", call. = FALSE)
   general <- .is_general(year)
   state <- .check_states(state, if (general) .states_df else .states)
+  if (!is.null(as_of)) {
+    as_of <- tryCatch(as.Date(as_of), error = function(e) NA)
+    if (length(as_of) != 1L || is.na(as_of))
+      stop("`as_of` must be a single date.", call. = FALSE)
+  }
   path <- .elected_file(index[index$year == year, , drop = FALSE], cache_dir,
                         refresh, base_url)
   x <- tibble::as_tibble(nanoparquet::read_parquet(path))
@@ -87,6 +116,11 @@ get_elected <- function(year = 2024L, state = NULL, municipality = NULL,
     x <- x[normalize_text(x$party_at_election) %in% normalize_text(party), , drop = FALSE]
   if (!include_alternates)
     x <- x[normalize_text(x$election_status) != "SUPLENTE", , drop = FALSE]
+  if (!is.null(as_of)) {
+    if (is.null(events))
+      events <- get_officeholding_events(cache_dir = cache_dir, base_url = base_url)
+    x <- .apply_events(x, .parse_events(as.data.frame(events)), as_of)
+  }
   attr(x, "source") <- sprintf("https://dadosabertos.tse.jus.br/dataset/resultados-%d", year)
   attr(x, "notice") <- paste("Election results; they do not establish current",
                              "office holding or party membership.")
@@ -98,10 +132,10 @@ get_elected <- function(year = 2024L, state = NULL, municipality = NULL,
 get_mayors <- function(year = 2024L, state = NULL, municipality = NULL,
                        party = NULL,
                        cache_dir = tools::R_user_dir("electedBR", "cache"),
-                       refresh = FALSE,
+                       refresh = FALSE, as_of = NULL, events = NULL,
                        base_url = getOption("electedBR.base_url")) {
   get_elected(year, state, municipality, "mayor", party, FALSE, cache_dir,
-              refresh, base_url)
+              refresh, as_of, events, base_url)
 }
 
 #' @rdname get_elected
@@ -112,24 +146,26 @@ get_councilors <- function(year = 2024L, state = NULL, municipality = NULL,
                            refresh = FALSE,
                            base_url = getOption("electedBR.base_url")) {
   get_elected(year, state, municipality, "councilor", party,
-              include_alternates, cache_dir, refresh, base_url)
+              include_alternates, cache_dir, refresh, NULL, NULL, base_url)
 }
 
 #' @rdname get_elected
-#' @param ano,uf,municipio,cargo,partido,incluir_suplentes,atualizar Portuguese
-#'   aliases of `year`, `state`, `municipality`, `office`, `party`,
-#'   `include_alternates` and `refresh`. `cargo` also accepts the Portuguese
-#'   labels `"PREFEITO"`, `"VICE-PREFEITO"`, `"VEREADOR"`, `"SENADOR"`,
-#'   `"DEPUTADO FEDERAL"`, `"DEPUTADO ESTADUAL"` and `"DEPUTADO DISTRITAL"`.
+#' @param ano,uf,municipio,cargo,partido,incluir_suplentes,atualizar,data_referencia,eventos
+#'   Portuguese aliases of `year`, `state`, `municipality`, `office`, `party`,
+#'   `include_alternates`, `refresh`, `as_of` and `events`. `cargo` also
+#'   accepts the Portuguese labels `"PRESIDENTE"`, `"VICE-PRESIDENTE"`,
+#'   `"GOVERNADOR"`, `"VICE-GOVERNADOR"`, `"SENADOR"`, `"DEPUTADO FEDERAL"`,
+#'   `"DEPUTADO ESTADUAL"`, `"DEPUTADO DISTRITAL"`, `"PREFEITO"`,
+#'   `"VICE-PREFEITO"` and `"VEREADOR"`.
 #' @export
 consultar_eleitos <- function(ano = 2024L, uf = NULL, municipio = NULL,
                               cargo = NULL, partido = NULL,
                               incluir_suplentes = FALSE,
                               cache_dir = tools::R_user_dir("electedBR", "cache"),
-                              atualizar = FALSE,
+                              atualizar = FALSE, data_referencia = NULL, eventos = NULL,
                               base_url = getOption("electedBR.base_url")) {
   get_elected(ano, uf, municipio, .office_from_pt(cargo), partido,
-              incluir_suplentes, cache_dir, atualizar, base_url)
+              incluir_suplentes, cache_dir, atualizar, data_referencia, eventos, base_url)
 }
 
 #' @rdname get_elected
@@ -137,9 +173,10 @@ consultar_eleitos <- function(ano = 2024L, uf = NULL, municipio = NULL,
 consultar_prefeitos <- function(ano = 2024L, uf = NULL, municipio = NULL,
                                 partido = NULL,
                                 cache_dir = tools::R_user_dir("electedBR", "cache"),
-                                atualizar = FALSE,
+                                atualizar = FALSE, data_referencia = NULL, eventos = NULL,
                                 base_url = getOption("electedBR.base_url")) {
-  get_mayors(ano, uf, municipio, partido, cache_dir, atualizar, base_url)
+  get_mayors(ano, uf, municipio, partido, cache_dir, atualizar, data_referencia, eventos,
+             base_url)
 }
 
 #' @rdname get_elected
@@ -154,6 +191,8 @@ consultar_vereadores <- function(ano = 2024L, uf = NULL, municipio = NULL,
 }
 
 # ---- helpers ---------------------------------------------------------------
+
+.data_base_url <- "https://huggingface.co/datasets/mlkwy/electedBR/resolve/main"
 
 .is_general <- function(year) year %% 4L == 2L
 

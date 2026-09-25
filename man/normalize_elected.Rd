@@ -3,11 +3,11 @@
 \name{normalize_elected}
 \alias{normalize_elected}
 \alias{normalizar_eleitos}
-\title{Consolidate TSE vote records into the candidates elected}
+\title{Consolidate TSE files into the candidates elected}
 \usage{
-normalize_elected(data, include_alternates = FALSE)
+normalize_elected(data, candidates = NULL, include_alternates = FALSE)
 
-normalizar_eleitos(dados, incluir_suplentes = FALSE)
+normalizar_eleitos(dados, candidatos = NULL, incluir_suplentes = FALSE)
 }
 \arguments{
 \item{data}{A data frame with the TSE vote-by-municipality-and-zone layout.
@@ -16,37 +16,55 @@ The columns \code{ANO_ELEICAO}, \code{CD_ELEICAO}, \code{NR_TURNO}, \code{SG_UF}
 \code{NM_CANDIDATO}, \code{NM_URNA_CANDIDATO}, \code{SG_PARTIDO}, \code{DS_SIT_TOT_TURNO} and
 \code{QT_VOTOS_NOMINAIS} are required (case-insensitive).}
 
+\item{candidates}{Optional data frame with the TSE candidates layout
+(\code{consulta_cand}), used to add the elected running mates. The columns
+\code{ANO_ELEICAO}, \code{CD_ELEICAO}, \code{NR_TURNO}, \code{SG_UF}, \code{SG_UE}, \code{NM_UE},
+\code{CD_CARGO}, \code{SQ_CANDIDATO}, \code{NR_CANDIDATO}, \code{NM_CANDIDATO},
+\code{NM_URNA_CANDIDATO}, \code{SG_PARTIDO} and \code{DS_SIT_TOT_TURNO} are required.}
+
 \item{include_alternates}{Logical. Also keep candidates whose final status
 is \code{SUPLENTE} (alternate) in the TSE file. Senate ticket alternates have no
 votes of their own and are not covered; see \code{\link[=get_senators]{get_senators()}} for the
 alternates currently serving.}
 
-\item{dados, incluir_suplentes}{Portuguese aliases of \code{data} and
-\code{include_alternates}.}
+\item{dados, candidatos, incluir_suplentes}{Portuguese aliases of \code{data},
+\code{candidates} and \code{include_alternates}.}
 }
 \value{
 A tibble with one row per candidate and election, with the columns
 \code{year}, \code{election_id}, \code{round}, \code{state}, \code{municipality_tse_id},
-\code{municipality}, \code{office}, \code{candidate_id}, \code{name}, \code{ballot_name},
-\code{party_at_election}, \code{election_status}, \code{votes} and \code{reference}. For
-statewide offices \code{municipality_tse_id} and \code{municipality} are \code{NA}.
-\code{office} is one of \code{mayor}, \code{deputy_mayor}, \code{councilor}, \code{senator},
-\code{federal_deputy}, \code{state_deputy} or \code{district_deputy}; presidential and
-gubernatorial rows are dropped.
+\code{municipality}, \code{office}, \code{candidate_id}, \code{ticket_candidate_id}, \code{name},
+\code{ballot_name}, \code{party_at_election}, \code{election_status}, \code{votes} and
+\code{reference}. \code{office} is one of \code{president}, \code{vice_president},
+\code{governor}, \code{vice_governor}, \code{senator}, \code{federal_deputy}, \code{state_deputy},
+\code{district_deputy}, \code{mayor}, \code{vice_mayor} or \code{councilor}. For statewide
+offices \code{municipality_tse_id} and \code{municipality} are \code{NA}; for president
+and vice president \code{state} is \code{NA} as well. \code{ticket_candidate_id} is \code{NA}
+except for running mates, and \code{votes} is \code{NA} for running mates.
 }
 \description{
 Turns the raw \emph{votação nominal por município e zona} table published by the
 Superior Electoral Court (TSE) into one row per elected candidate. Votes are
-summed over electoral zones (and, for statewide offices, over
-municipalities), the last round available for each candidate is kept, and
-distinct elections held on the same date (for instance ordinary and
-supplementary polls, which have different \code{CD_ELEICAO} codes) are never
-merged. This is the function that builds the yearly files distributed with
-the package; it is exported so that the same rules can be applied to a
-fresh TSE download (for example the output of \code{electionsBR::elections_tse()}).
+summed over electoral zones (over municipalities for statewide offices and
+over the whole country for president), the last round available for each
+candidate is kept, and distinct elections held on the same date (for
+instance ordinary and supplementary polls, which have different
+\code{CD_ELEICAO} codes) are never merged.
+}
+\details{
+Running mates (vice president, vice governors and vice mayors) receive no
+votes of their own and are absent from the vote files. When the TSE
+\emph{candidatos} table of the same year is given in \code{candidates}, the running
+mates classified as elected are added with \code{votes = NA} and
+\code{ticket_candidate_id} pointing to the head of their ticket (same
+\code{NR_CANDIDATO} in the same election and electoral unit).
+
+This is the function that builds the yearly files distributed with the
+package; it is exported so that the same rules can be applied to a fresh
+TSE download (for example the output of \code{electionsBR::elections_tse()}).
 }
 \examples{
-raw <- data.frame(
+votes <- data.frame(
   ANO_ELEICAO = 2024, CD_ELEICAO = "619", NR_TURNO = 1, SG_UF = "PE",
   CD_MUNICIPIO = "25313", NM_MUNICIPIO = "RECIFE", CD_CARGO = "13",
   DS_CARGO = "Vereador", SQ_CANDIDATO = c("1", "1", "2"),
@@ -56,8 +74,8 @@ raw <- data.frame(
   DS_SIT_TOT_TURNO = c("ELEITO POR QP", "ELEITO POR QP", "SUPLENTE"),
   QT_VOTOS_NOMINAIS = c(100, 50, 200)
 )
-normalize_elected(raw)
-normalize_elected(raw, include_alternates = TRUE)
+normalize_elected(votes)
+normalize_elected(votes, include_alternates = TRUE)
 }
 \seealso{
 \code{\link[=get_elected]{get_elected()}} for the ready-made yearly files.

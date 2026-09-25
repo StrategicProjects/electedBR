@@ -13,8 +13,47 @@ test_that("cached files allow offline queries and empty results keep the schema"
   expect_equal(nrow(z), 0)
   expect_identical(names(z), names(x))
   all <- get_elected(cache_dir = dir)
-  expect_equal(nrow(all), 3)
-  expect_equal(nrow(get_elected(include_alternates = TRUE, cache_dir = dir)), 4)
+  expect_equal(nrow(all), 4)
+  expect_equal(nrow(get_elected(include_alternates = TRUE, cache_dir = dir)), 5)
+  v <- get_elected(office = "vice_mayor", cache_dir = dir)
+  expect_identical(v$ticket_candidate_id, "1")
+})
+
+test_that("as_of applies office-holding events; successors inherit the office", {
+  dir <- withr::local_tempdir()
+  seed_cache(dir)
+  ev <- events_fixture()
+  before <- get_mayors(state = "PE", as_of = "2026-04-01", events = ev, cache_dir = dir)
+  expect_identical(before$status_as_of, "no_change_recorded")
+  expect_identical(before$office_as_of, "mayor")
+  x <- get_elected(state = "PE", office = c("mayor", "vice_mayor"), as_of = "2026-04-03",
+                   events = ev, cache_dir = dir)
+  expect_identical(x$status_as_of[x$candidate_id == "1"], "resignation")
+  expect_equal(x$status_date[x$candidate_id == "1"], as.Date("2026-04-02"))
+  # the successor only takes over on successor_date
+  expect_identical(x$status_as_of[x$candidate_id == "9"], "no_change_recorded")
+  y <- get_elected(state = "PE", office = c("mayor", "vice_mayor"), as_of = as.Date("2026-06-01"),
+                   events = ev, cache_dir = dir)
+  expect_identical(y$status_as_of[y$candidate_id == "9"], "succession")
+  expect_identical(y$office_as_of[y$candidate_id == "9"], "mayor")
+  expect_identical(y$status_source[y$candidate_id == "9"], "https://example.org/record")
+  expect_identical(y$office[y$candidate_id == "9"], "vice_mayor")
+  # a later return cancels the leave
+  ev2 <- rbind(ev, transform(ev, event = "leave", date = "2026-08-01",
+                             successor_date = "2026-08-01"),
+               transform(ev, event = "return", date = "2026-09-01",
+                         successor_candidate_id = NA, successor_date = NA))
+  z <- get_mayors(state = "PE", as_of = "2026-09-15", events = ev2, cache_dir = dir)
+  expect_identical(z$status_as_of, "return")
+  expect_identical(consultar_prefeitos(uf = "PE", data_referencia = "2026-09-15", eventos = ev2,
+                                       cache_dir = dir), z)
+  expect_error(get_mayors(as_of = "not a date", events = ev, cache_dir = dir), "as_of")
+  expect_error(get_mayors(as_of = "2026-01-01", events = data.frame(a = 1), cache_dir = dir),
+               "events table")
+  bad <- ev
+  bad$event <- "vacation"
+  expect_error(get_mayors(as_of = "2026-01-01", events = bad, cache_dir = dir), "unknown event")
+  expect_named(get_officeholding_events(events = ev), c(names(ev)))
 })
 
 test_that("year, office and state are validated before any download", {
@@ -22,6 +61,7 @@ test_that("year, office and state are validated before any download", {
   expect_error(get_elected(year = 1999, cache_dir = dir), "elected_years")
   expect_error(get_elected(year = 2024, office = "senator", cache_dir = dir), "do not match")
   expect_error(get_elected(year = 2022, office = "mayor", cache_dir = dir), "do not match")
+  expect_error(get_elected(year = 2024, office = "vice_governor", cache_dir = dir), "do not match")
   expect_error(get_elected(year = 2024, office = "king", cache_dir = dir), "Invalid `office`")
   expect_error(get_elected(year = 2024, state = "XX", cache_dir = dir), "Invalid state")
   expect_error(get_elected(year = 2024, state = "DF", cache_dir = dir), "Invalid state")
@@ -46,6 +86,8 @@ test_that("English and Portuguese interfaces return identical tibbles", {
                    consultar_eleitos(cargo = "Vereador", cache_dir = dir))
   expect_identical(get_elected(office = "councilor", cache_dir = dir),
                    consultar_eleitos(cargo = "councilor", cache_dir = dir))
+  expect_identical(get_elected(office = "vice_mayor", cache_dir = dir),
+                   consultar_eleitos(cargo = "Vice-Prefeito", cache_dir = dir))
   expect_error(consultar_eleitos(cargo = "REI", cache_dir = dir), "Invalid `cargo`")
 })
 
