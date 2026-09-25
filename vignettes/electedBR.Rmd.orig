@@ -32,8 +32,10 @@ library(electedBR)
 ## Election results
 
 The yearly files are listed in `elected_years`. The first query for a year
-downloads its file (1 to 25 MB) into the user cache directory; here we
-use a temporary directory instead.
+downloads its file (1 to 25 MB) into the cache directory, which by default is
+a folder under `tempdir()`; set the `electedBR.cache_dir` option or the
+`ELECTEDBR_CACHE_DIR` environment variable to keep the files between sessions
+(see `?elected_cache_dir`). Here we use an explicit temporary directory.
 
 ```{r index}
 elected_years[, c("year", "kind", "rows", "built")]

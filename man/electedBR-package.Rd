@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.svg}{options: style='float: right' alt='logo' width='120'}}
 
-Retrieves the candidates elected in Brazilian municipal and general elections since 2018, consolidated from the open data of the Superior Electoral Court ('TSE', \url{https://dadosabertos.tse.jus.br/}) and distributed as yearly 'Parquet' files, together with the federal deputies and senators currently serving according to the open data 'APIs' of the Chamber of Deputies (\url{https://dadosabertos.camara.leg.br/}) and the Federal Senate (\url{https://www12.senado.leg.br/dados-abertos}). Election results and current office holding are kept as distinct queries; electoral roles, service history and provenance are preserved. Every function returns a tibble with English column names and has a Portuguese alias.
+Retrieves the candidates elected in Brazilian municipal and general elections since 2018, consolidated from the open data of the Superior Electoral Court (TSE, \url{https://dadosabertos.tse.jus.br/}) and distributed as yearly Parquet files, together with the federal deputies and senators currently serving according to the open data APIs of the Chamber of Deputies (\url{https://dadosabertos.camara.leg.br/}) and the Federal Senate (\url{https://www12.senado.leg.br/dados-abertos}). Election results and current office holding are kept as distinct queries; electoral roles, service history and provenance are preserved. Every function returns a tibble with English column names and has a Portuguese alias.
 }
 \seealso{
 Useful links:

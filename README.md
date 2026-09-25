@@ -59,9 +59,15 @@ consultar_eleitos(2022, uf = "PE", cargo = "SENADOR")
 ```
 
 The first query for a year downloads its file (about 1 MB for a general
-election, up to 25 MB for a municipal one) into
-`tools::R_user_dir("electedBR", "cache")`; later queries read the local
-copy. `elected_years` lists the files, their checksums and build dates.
+election, up to 25 MB for a municipal one) into the cache directory; later
+queries read the local copy. By default the cache is a folder under
+`tempdir()` and vanishes with the session. To keep the files, set the
+`ELECTEDBR_CACHE_DIR` environment variable or the `electedBR.cache_dir`
+option, for example:
+
+``` r
+options(electedBR.cache_dir = tools::R_user_dir("electedBR", "cache"))
+``` `elected_years` lists the files, their checksums and build dates.
 
 Columns: `year`, `election_id`, `round`, `state`, `municipality_tse_id`,
 `municipality`, `office`, `candidate_id`, `ticket_candidate_id`, `name`,
@@ -145,7 +151,7 @@ consultar_historico_exercicio("camara:204379")
 | `get_deputies()`, `get_senators()` | `consultar_deputados()`, `consultar_senadores()` |
 | `get_service_history()` | `consultar_historico_exercicio()` |
 | `get_officeholding_events()` | `consultar_eventos_exercicio()` |
-| `normalize_elected()`, `elected_clear_cache()` | `normalizar_eleitos()`, `limpar_cache_eleitos()` |
+| `normalize_elected()`, `elected_cache_dir()`, `elected_clear_cache()` | `normalizar_eleitos()`, `diretorio_cache_eleitos()`, `limpar_cache_eleitos()` |
 | `year`, `state`, `municipality`, `office`, `party` | `ano`, `uf`, `municipio`, `cargo`, `partido` |
 | `include_alternates`, `refresh`, `max_age_hours` | `incluir_suplentes`, `atualizar`, `validade_horas` |
 | `as_of`, `events` | `data_referencia`, `eventos` |

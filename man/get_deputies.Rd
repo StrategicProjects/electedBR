@@ -14,7 +14,7 @@ get_deputies(
   role = NULL,
   refresh = FALSE,
   max_age_hours = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 get_senators(
@@ -24,7 +24,7 @@ get_senators(
   role = NULL,
   refresh = FALSE,
   max_age_hours = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 consultar_deputados(
@@ -34,7 +34,7 @@ consultar_deputados(
   condicao = NULL,
   atualizar = FALSE,
   validade_horas = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 consultar_senadores(
@@ -44,7 +44,7 @@ consultar_senadores(
   condicao = NULL,
   atualizar = FALSE,
   validade_horas = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 }
 \arguments{
@@ -61,8 +61,7 @@ consultar_senadores(
 
 \item{max_age_hours}{Maximum age of the cache, in hours (default six).}
 
-\item{cache_dir}{Cache directory; defaults to
-\code{tools::R_user_dir("electedBR", "cache")}.}
+\item{cache_dir}{Cache directory; see \code{\link[=elected_cache_dir]{elected_cache_dir()}}.}
 
 \item{uf, partido, situacao, condicao, atualizar, validade_horas}{Portuguese
 aliases of \code{state}, \code{party}, \code{status} (\code{"em_exercicio"}), \code{role}

@@ -5,13 +5,12 @@
 \alias{limpar_cache_eleitos}
 \title{Remove cached files}
 \usage{
-elected_clear_cache(cache_dir = tools::R_user_dir("electedBR", "cache"))
+elected_clear_cache(cache_dir = elected_cache_dir())
 
-limpar_cache_eleitos(cache_dir = tools::R_user_dir("electedBR", "cache"))
+limpar_cache_eleitos(cache_dir = elected_cache_dir())
 }
 \arguments{
-\item{cache_dir}{Cache directory; the package default is
-\code{tools::R_user_dir("electedBR", "cache")}.}
+\item{cache_dir}{Cache directory; see \code{\link[=elected_cache_dir]{elected_cache_dir()}}.}
 }
 \value{
 The number of files removed, invisibly.

@@ -9,14 +9,14 @@ get_service_history(
   person_id,
   refresh = FALSE,
   max_age_hours = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 
 consultar_historico_exercicio(
   id_pessoa,
   atualizar = FALSE,
   validade_horas = 6,
-  cache_dir = tools::R_user_dir("electedBR", "cache")
+  cache_dir = elected_cache_dir()
 )
 }
 \arguments{
@@ -26,8 +26,7 @@ consultar_historico_exercicio(
 
 \item{max_age_hours}{Maximum age of the cache, in hours (default six).}
 
-\item{cache_dir}{Cache directory; defaults to
-\code{tools::R_user_dir("electedBR", "cache")}.}
+\item{cache_dir}{Cache directory; see \code{\link[=elected_cache_dir]{elected_cache_dir()}}.}
 
 \item{id_pessoa, atualizar, validade_horas}{Portuguese aliases of \code{person_id},
 \code{refresh} and \code{max_age_hours}.}

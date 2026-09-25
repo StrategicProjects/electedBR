@@ -167,8 +167,7 @@
 #'   `"unknown"`.
 #' @param refresh Logical. Collect again even if a fresh cache exists.
 #' @param max_age_hours Maximum age of the cache, in hours (default six).
-#' @param cache_dir Cache directory; defaults to
-#'   `tools::R_user_dir("electedBR", "cache")`.
+#' @param cache_dir Cache directory; see [elected_cache_dir()].
 #' @return A tibble with the columns `person_id`, `source_id`, `name`, `state`,
 #'   `office`, `current_party`, `mandate_id`, `mandate_role`,
 #'   `mandate_role_raw`, `exercise_status`, `exercise_status_raw`,
@@ -185,7 +184,7 @@
 #' @export
 get_deputies <- function(state = NULL, party = NULL, status = "serving", role = NULL,
                          refresh = FALSE, max_age_hours = 6,
-                         cache_dir = tools::R_user_dir("electedBR", "cache")) {
+                         cache_dir = elected_cache_dir()) {
   .filter_current(.empty_current(), state, party, role, status)
   scope <- if (is.null(state)) "ALL" else paste(sort(unique(normalize_text(state))), collapse = "-")
   x <- .cached_table(paste0("camara_current_v1_", scope), function() {
@@ -208,7 +207,7 @@ get_deputies <- function(state = NULL, party = NULL, status = "serving", role = 
 #' @export
 get_senators <- function(state = NULL, party = NULL, status = "serving", role = NULL,
                          refresh = FALSE, max_age_hours = 6,
-                         cache_dir = tools::R_user_dir("electedBR", "cache")) {
+                         cache_dir = elected_cache_dir()) {
   .filter_current(.empty_current(), state, party, role, status)
   x <- .cached_table("senado_current_v1", function() {
     .parse_senators(.json_get("https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json"))
@@ -239,7 +238,7 @@ get_senators <- function(state = NULL, party = NULL, status = "serving", role = 
 #' @export
 consultar_deputados <- function(uf = NULL, partido = NULL, situacao = "em_exercicio",
                                 condicao = NULL, atualizar = FALSE, validade_horas = 6,
-                                cache_dir = tools::R_user_dir("electedBR", "cache")) {
+                                cache_dir = elected_cache_dir()) {
   get_deputies(uf, partido, .pt_status(situacao), .pt_role(condicao), atualizar,
                validade_horas, cache_dir)
 }
@@ -248,7 +247,7 @@ consultar_deputados <- function(uf = NULL, partido = NULL, situacao = "em_exerci
 #' @export
 consultar_senadores <- function(uf = NULL, partido = NULL, situacao = "em_exercicio",
                                 condicao = NULL, atualizar = FALSE, validade_horas = 6,
-                                cache_dir = tools::R_user_dir("electedBR", "cache")) {
+                                cache_dir = elected_cache_dir()) {
   get_senators(uf, partido, .pt_status(situacao), .pt_role(condicao), atualizar,
                validade_horas, cache_dir)
 }

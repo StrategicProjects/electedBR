@@ -10,7 +10,8 @@
 #'
 #' The first call for a year downloads its Parquet file (about 1 MB for a
 #' general election, up to 25 MB for a municipal one, see `elected_years$bytes`)
-#' into `cache_dir`; later calls read the local copy. Results describe who was
+#' into `cache_dir`; later calls read the local copy. The default cache lives
+#' under [tempdir()]; see [elected_cache_dir()] to make it persistent. Results describe who was
 #' elected in the poll: they do not establish who currently holds office nor
 #' current party membership. For sitting members of Congress use
 #' [get_deputies()] and [get_senators()]; for mayors and governors, `as_of`
@@ -35,8 +36,10 @@
 #' @param include_alternates Logical. Also return the candidates classified as
 #'   `SUPLENTE` (alternate) in the TSE file. This is the classification at the
 #'   poll, not a current substitution queue.
-#' @param cache_dir Directory where the yearly files are stored. Defaults to
-#'   the per-user cache directory returned by [tools::R_user_dir()].
+#' @param cache_dir Directory where the yearly files are stored; see
+#'   [elected_cache_dir()]. By default a folder under [tempdir()], so set the
+#'   option or environment variable described there to keep files between
+#'   sessions.
 #' @param refresh Logical. Download the file again even if a copy is cached.
 #' @param as_of Optional date (or string convertible with [as.Date()]). When
 #'   given, the office-holding events dated on or before it are applied and
@@ -82,7 +85,7 @@
 #' @export
 get_elected <- function(year = 2024L, state = NULL, municipality = NULL,
                         office = NULL, party = NULL, include_alternates = FALSE,
-                        cache_dir = tools::R_user_dir("electedBR", "cache"),
+                        cache_dir = elected_cache_dir(),
                         refresh = FALSE, as_of = NULL, events = NULL,
                         base_url = getOption("electedBR.base_url")) {
   index <- .elected_index()
@@ -131,7 +134,7 @@ get_elected <- function(year = 2024L, state = NULL, municipality = NULL,
 #' @export
 get_mayors <- function(year = 2024L, state = NULL, municipality = NULL,
                        party = NULL,
-                       cache_dir = tools::R_user_dir("electedBR", "cache"),
+                       cache_dir = elected_cache_dir(),
                        refresh = FALSE, as_of = NULL, events = NULL,
                        base_url = getOption("electedBR.base_url")) {
   get_elected(year, state, municipality, "mayor", party, FALSE, cache_dir,
@@ -142,7 +145,7 @@ get_mayors <- function(year = 2024L, state = NULL, municipality = NULL,
 #' @export
 get_councilors <- function(year = 2024L, state = NULL, municipality = NULL,
                            party = NULL, include_alternates = FALSE,
-                           cache_dir = tools::R_user_dir("electedBR", "cache"),
+                           cache_dir = elected_cache_dir(),
                            refresh = FALSE,
                            base_url = getOption("electedBR.base_url")) {
   get_elected(year, state, municipality, "councilor", party,
@@ -161,7 +164,7 @@ get_councilors <- function(year = 2024L, state = NULL, municipality = NULL,
 consultar_eleitos <- function(ano = 2024L, uf = NULL, municipio = NULL,
                               cargo = NULL, partido = NULL,
                               incluir_suplentes = FALSE,
-                              cache_dir = tools::R_user_dir("electedBR", "cache"),
+                              cache_dir = elected_cache_dir(),
                               atualizar = FALSE, data_referencia = NULL, eventos = NULL,
                               base_url = getOption("electedBR.base_url")) {
   get_elected(ano, uf, municipio, .office_from_pt(cargo), partido,
@@ -172,7 +175,7 @@ consultar_eleitos <- function(ano = 2024L, uf = NULL, municipio = NULL,
 #' @export
 consultar_prefeitos <- function(ano = 2024L, uf = NULL, municipio = NULL,
                                 partido = NULL,
-                                cache_dir = tools::R_user_dir("electedBR", "cache"),
+                                cache_dir = elected_cache_dir(),
                                 atualizar = FALSE, data_referencia = NULL, eventos = NULL,
                                 base_url = getOption("electedBR.base_url")) {
   get_mayors(ano, uf, municipio, partido, cache_dir, atualizar, data_referencia, eventos,
@@ -183,7 +186,7 @@ consultar_prefeitos <- function(ano = 2024L, uf = NULL, municipio = NULL,
 #' @export
 consultar_vereadores <- function(ano = 2024L, uf = NULL, municipio = NULL,
                                  partido = NULL, incluir_suplentes = FALSE,
-                                 cache_dir = tools::R_user_dir("electedBR", "cache"),
+                                 cache_dir = elected_cache_dir(),
                                  atualizar = FALSE,
                                  base_url = getOption("electedBR.base_url")) {
   get_councilors(ano, uf, municipio, partido, incluir_suplentes, cache_dir,

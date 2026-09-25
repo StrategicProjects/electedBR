@@ -51,7 +51,7 @@
 #' get_officeholding_events(cache_dir = tempdir())
 #' @export
 get_officeholding_events <- function(events = NULL, refresh = FALSE, max_age_hours = 24,
-                                     cache_dir = tools::R_user_dir("electedBR", "cache"),
+                                     cache_dir = elected_cache_dir(),
                                      base_url = getOption("electedBR.base_url")) {
   if (!is.null(events)) return(.parse_events(as.data.frame(events)))
   url <- paste0(sub("/+$", "", base_url %||% .data_base_url), "/officeholding_events.csv")
@@ -73,7 +73,7 @@ get_officeholding_events <- function(events = NULL, refresh = FALSE, max_age_hou
 #'   `refresh` and `max_age_hours`.
 #' @export
 consultar_eventos_exercicio <- function(eventos = NULL, atualizar = FALSE, validade_horas = 24,
-                                        cache_dir = tools::R_user_dir("electedBR", "cache"),
+                                        cache_dir = elected_cache_dir(),
                                         base_url = getOption("electedBR.base_url")) {
   get_officeholding_events(eventos, atualizar, validade_horas, cache_dir, base_url)
 }

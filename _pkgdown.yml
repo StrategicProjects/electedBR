@@ -37,6 +37,7 @@ reference:
 
   - title: "Utilities"
     contents:
+      - elected_cache_dir
       - elected_clear_cache
       - electedBR-package
 

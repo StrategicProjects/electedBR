@@ -86,7 +86,7 @@
 #' get_service_history("camara:204379", cache_dir = tempdir())
 #' @export
 get_service_history <- function(person_id, refresh = FALSE, max_age_hours = 6,
-                                cache_dir = tools::R_user_dir("electedBR", "cache")) {
+                                cache_dir = elected_cache_dir()) {
   if (!is.character(person_id) || length(person_id) != 1L || is.na(person_id) ||
       !grepl("^(camara|senado):[0-9]+$", person_id))
     stop("`person_id` must be a single id from get_deputies() or get_senators(), ",
@@ -110,6 +110,6 @@ get_service_history <- function(person_id, refresh = FALSE, max_age_hours = 6,
 #'   `refresh` and `max_age_hours`.
 #' @export
 consultar_historico_exercicio <- function(id_pessoa, atualizar = FALSE, validade_horas = 6,
-                                          cache_dir = tools::R_user_dir("electedBR", "cache")) {
+                                          cache_dir = elected_cache_dir()) {
   get_service_history(id_pessoa, atualizar, validade_horas, cache_dir)
 }

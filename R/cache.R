@@ -34,13 +34,52 @@
   x
 }
 
+#' Cache directory
+#'
+#' Directory where the yearly election files, the parliamentary tables and
+#' their snapshots are stored. By default it is a folder under the session's
+#' [tempdir()], so nothing persists between sessions and nothing is written
+#' outside the temporary directory unless you opt in. To keep the files
+#' between sessions, set the environment variable `ELECTEDBR_CACHE_DIR` or the
+#' option `electedBR.cache_dir` (for example to
+#' `tools::R_user_dir("electedBR", "cache")`), or pass `cache_dir` to each
+#' function. The precedence is: the `cache_dir` argument, then the
+#' environment variable, then the option, then [tempdir()].
+#'
+#' The parliamentary functions also keep a snapshot of every completed
+#' collection under `cache_dir/snapshots/`; with a persistent cache these
+#' accumulate and can be removed with [elected_clear_cache()].
+#'
+#' @param path Optional directory; when given, it is returned (created if
+#'   needed) instead of the default resolution.
+#' @return The cache directory path, created if needed, invisibly.
+#' @examples
+#' elected_cache_dir()
+#' old <- Sys.getenv("ELECTEDBR_CACHE_DIR", unset = NA)
+#' Sys.setenv(ELECTEDBR_CACHE_DIR = file.path(tempdir(), "electedBR-persistent"))
+#' elected_cache_dir()
+#' if (is.na(old)) Sys.unsetenv("ELECTEDBR_CACHE_DIR") else
+#'   Sys.setenv(ELECTEDBR_CACHE_DIR = old)
+#' @export
+elected_cache_dir <- function(path = NULL) {
+  dir <- path
+  if (is.null(dir)) {
+    env <- Sys.getenv("ELECTEDBR_CACHE_DIR", unset = "")
+    dir <- if (nzchar(env)) env else getOption("electedBR.cache_dir")
+  }
+  if (is.null(dir)) dir <- file.path(tempdir(), "electedBR")
+  if (!is.character(dir) || length(dir) != 1L || is.na(dir) || !nzchar(dir))
+    stop("The cache directory must be a single non-empty path.", call. = FALSE)
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  invisible(normalizePath(dir, mustWork = FALSE))
+}
+
 #' Remove cached files
 #'
 #' Deletes the yearly election files, the cached parliamentary tables and the
 #' snapshots stored in `cache_dir`. The next query downloads them again.
 #'
-#' @param cache_dir Cache directory; the package default is
-#'   `tools::R_user_dir("electedBR", "cache")`.
+#' @param cache_dir Cache directory; see [elected_cache_dir()].
 #' @return The number of files removed, invisibly.
 #' @examples
 #' dir <- file.path(tempdir(), "electedBR-example")
@@ -48,7 +87,7 @@
 #' writeLines("x", file.path(dir, "elected_2024.parquet"))
 #' elected_clear_cache(dir)
 #' @export
-elected_clear_cache <- function(cache_dir = tools::R_user_dir("electedBR", "cache")) {
+elected_clear_cache <- function(cache_dir = elected_cache_dir()) {
   if (!dir.exists(cache_dir)) return(invisible(0L))
   files <- list.files(cache_dir, recursive = TRUE, full.names = TRUE, all.files = TRUE,
                       include.dirs = FALSE)
@@ -61,3 +100,8 @@ elected_clear_cache <- function(cache_dir = tools::R_user_dir("electedBR", "cach
 #' @rdname elected_clear_cache
 #' @export
 limpar_cache_eleitos <- elected_clear_cache
+
+#' @rdname elected_cache_dir
+#' @param caminho Portuguese alias of `path`.
+#' @export
+diretorio_cache_eleitos <- function(caminho = NULL) elected_cache_dir(caminho)

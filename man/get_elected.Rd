@@ -16,7 +16,7 @@ get_elected(
   office = NULL,
   party = NULL,
   include_alternates = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   refresh = FALSE,
   as_of = NULL,
   events = NULL,
@@ -28,7 +28,7 @@ get_mayors(
   state = NULL,
   municipality = NULL,
   party = NULL,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   refresh = FALSE,
   as_of = NULL,
   events = NULL,
@@ -41,7 +41,7 @@ get_councilors(
   municipality = NULL,
   party = NULL,
   include_alternates = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   refresh = FALSE,
   base_url = getOption("electedBR.base_url")
 )
@@ -53,7 +53,7 @@ consultar_eleitos(
   cargo = NULL,
   partido = NULL,
   incluir_suplentes = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   atualizar = FALSE,
   data_referencia = NULL,
   eventos = NULL,
@@ -65,7 +65,7 @@ consultar_prefeitos(
   uf = NULL,
   municipio = NULL,
   partido = NULL,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   atualizar = FALSE,
   data_referencia = NULL,
   eventos = NULL,
@@ -78,7 +78,7 @@ consultar_vereadores(
   municipio = NULL,
   partido = NULL,
   incluir_suplentes = FALSE,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   atualizar = FALSE,
   base_url = getOption("electedBR.base_url")
 )
@@ -107,8 +107,10 @@ of their ticket by \code{ticket_candidate_id}.}
 \code{SUPLENTE} (alternate) in the TSE file. This is the classification at the
 poll, not a current substitution queue.}
 
-\item{cache_dir}{Directory where the yearly files are stored. Defaults to
-the per-user cache directory returned by \code{\link[tools:R_user_dir]{tools::R_user_dir()}}.}
+\item{cache_dir}{Directory where the yearly files are stored; see
+\code{\link[=elected_cache_dir]{elected_cache_dir()}}. By default a folder under \code{\link[=tempdir]{tempdir()}}, so set the
+option or environment variable described there to keep files between
+sessions.}
 
 \item{refresh}{Logical. Download the file again even if a copy is cached.}
 
@@ -155,7 +157,8 @@ years (2018, 2022, ...).
 \details{
 The first call for a year downloads its Parquet file (about 1 MB for a
 general election, up to 25 MB for a municipal one, see \code{elected_years$bytes})
-into \code{cache_dir}; later calls read the local copy. Results describe who was
+into \code{cache_dir}; later calls read the local copy. The default cache lives
+under \code{\link[=tempdir]{tempdir()}}; see \code{\link[=elected_cache_dir]{elected_cache_dir()}} to make it persistent. Results describe who was
 elected in the poll: they do not establish who currently holds office nor
 current party membership. For sitting members of Congress use
 \code{\link[=get_deputies]{get_deputies()}} and \code{\link[=get_senators]{get_senators()}}; for mayors and governors, \code{as_of}

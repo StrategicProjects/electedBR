@@ -9,7 +9,7 @@ get_officeholding_events(
   events = NULL,
   refresh = FALSE,
   max_age_hours = 24,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   base_url = getOption("electedBR.base_url")
 )
 
@@ -17,7 +17,7 @@ consultar_eventos_exercicio(
   eventos = NULL,
   atualizar = FALSE,
   validade_horas = 24,
-  cache_dir = tools::R_user_dir("electedBR", "cache"),
+  cache_dir = elected_cache_dir(),
   base_url = getOption("electedBR.base_url")
 )
 }
@@ -29,8 +29,7 @@ downloading (for example a local copy under review).}
 
 \item{max_age_hours}{Maximum age of the cache, in hours (default six).}
 
-\item{cache_dir}{Cache directory; defaults to
-\code{tools::R_user_dir("electedBR", "cache")}.}
+\item{cache_dir}{Cache directory; see \code{\link[=elected_cache_dir]{elected_cache_dir()}}.}
 
 \item{base_url}{Optional base URL of a mirror hosting the files listed in
 \link{elected_years}. Defaults to \code{getOption("electedBR.base_url")}; when
