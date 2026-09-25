@@ -45,7 +45,8 @@ get_elected(2022, state = "DF", office = "district_deputy")
 consultar_eleitos(2022, uf = "PE", cargo = "SENADOR")
 ```
 
-The first query for a year downloads its file (a few megabytes) into
+The first query for a year downloads its file (about 1 MB for a general
+election, up to 25 MB for a municipal one) into
 `tools::R_user_dir("electedBR", "cache")`; later queries read the local
 copy. `elected_years` lists the files, their checksums and build dates.
 
@@ -68,6 +69,9 @@ What the results mean:
 - Municipality names are matched exactly, ignoring accents and case;
   codes are TSE codes, not IBGE codes. `party_at_election` is the party
   at the time of the election.
+- Deputy mayors run on the mayor’s ticket and have no votes of their own
+  in the TSE files, so `office = "deputy_mayor"` returns no rows;
+  presidents and governors are not covered.
 - Being elected does not mean being in office today: use the functions
   below for that.
 
@@ -134,9 +138,10 @@ Both interfaces return the same tibbles, with English columns.
 
 ## Related packages
 
-- [electionsBR](https://electionsbr.com/) downloads the raw TSE files
-  (candidates, votes by zone and section, coalitions, assets).
-- [congressbr](https://github.com/RobertMyles/congressbr) wraps the
+- [electionsBR](https://cran.r-project.org/package=electionsBR)
+  downloads the raw TSE files (candidates, votes by zone and section,
+  coalitions, assets).
+- [congressbr](https://github.com/duarteguilherme/congressbr) wraps the
   Chamber and Senate APIs for bills, votes and speeches.
 
 ## Citation

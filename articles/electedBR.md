@@ -1,0 +1,164 @@
+# Getting started with electedBR
+
+electedBR answers two different questions about Brazilian politics and
+keeps them apart:
+
+- **Who was elected?**
+  [`get_elected()`](https://strategicprojects.github.io/electedBR/reference/get_elected.md)
+  reads the candidates elected in a given year from yearly files
+  consolidated from the open data of the Superior Electoral Court (TSE).
+- **Who is serving now?**
+  [`get_deputies()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md)
+  and
+  [`get_senators()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md)
+  query the open data APIs of the Chamber of Deputies and the Federal
+  Senate for the members currently in service, and
+  [`get_service_history()`](https://strategicprojects.github.io/electedBR/reference/get_service_history.md)
+  returns the official records of one member.
+
+Every function returns a tibble with English column names, and every
+function has a Portuguese alias
+([`consultar_eleitos()`](https://strategicprojects.github.io/electedBR/reference/get_elected.md),
+[`consultar_senadores()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md),
+…).
+
+``` r
+
+library(electedBR)
+```
+
+## Election results
+
+The yearly files are listed in `elected_years`. The first query for a
+year downloads its file (1 to 25 MB) into the user cache directory; here
+we use a temporary directory instead.
+
+``` r
+
+elected_years[, c("year", "kind", "rows", "built")]
+#>   year      kind   rows      built
+#> 1 2018   general  20170 2026-09-25
+#> 2 2020 municipal 375733 2026-09-25
+#> 3 2022   general  16268 2026-09-25
+#> 4 2024 municipal 300459 2026-09-25
+cache <- tempdir()
+```
+
+Mayors elected in two municipalities of Pernambuco in 2024:
+
+``` r
+
+get_mayors(state = "PE", municipality = c("Recife", "Caruaru"), cache_dir = cache)
+#> Downloading elected_2024.parquet from https://huggingface.co/datasets/mlkwy/electedBR/resolve/main/elected_2024.parquet
+#> # A tibble: 2 × 14
+#>    year election_id round state municipality_tse_id municipality office
+#>   <int> <chr>       <int> <chr> <chr>               <chr>        <chr> 
+#> 1  2024 619             1 PE    23817               CARUARU      mayor 
+#> 2  2024 619             1 PE    25313               RECIFE       mayor 
+#> # ℹ 7 more variables: candidate_id <chr>, name <chr>, ballot_name <chr>,
+#> #   party_at_election <chr>, election_status <chr>, votes <dbl>,
+#> #   reference <chr>
+```
+
+Municipalities are matched by name (ignoring accents and case) or by
+their TSE code. Councilors of a municipality, by party, with the
+alternates classified by the TSE:
+
+``` r
+
+recife <- get_councilors(state = "PE", municipality = "Recife",
+                         include_alternates = TRUE, cache_dir = cache)
+table(recife$election_status)
+#> 
+#> ELEITO POR MÉDIA    ELEITO POR QP         SUPLENTE 
+#>                6               31              356
+```
+
+General elections (2018, 2022) hold the statewide offices; votes are
+summed over every municipality and the municipal columns are `NA`:
+
+``` r
+
+get_elected(2022, state = "PE", office = "senator", cache_dir = cache)
+#> Downloading elected_2022.parquet from https://huggingface.co/datasets/mlkwy/electedBR/resolve/main/elected_2022.parquet
+#> # A tibble: 1 × 14
+#>    year election_id round state municipality_tse_id municipality office 
+#>   <int> <chr>       <int> <chr> <chr>               <chr>        <chr>  
+#> 1  2022 546             1 PE    <NA>                <NA>         senator
+#> # ℹ 7 more variables: candidate_id <chr>, name <chr>, ballot_name <chr>,
+#> #   party_at_election <chr>, election_status <chr>, votes <dbl>,
+#> #   reference <chr>
+```
+
+The Portuguese aliases accept the Portuguese office labels and return
+exactly the same tibble:
+
+``` r
+
+identical(
+  consultar_eleitos(2022, uf = "PE", cargo = "SENADOR", cache_dir = cache),
+  get_elected(2022, state = "PE", office = "senator", cache_dir = cache)
+)
+#> [1] TRUE
+```
+
+Results describe the poll: `party_at_election` is the party at the time
+of the election, and a candidate elected in 2022 is not necessarily in
+office today.
+
+## Sitting members of Congress
+
+The current composition comes from the official APIs and is cached for
+six hours. `mandate_role` (principal or alternate) is kept separate from
+`exercise_status`, so alternates currently serving are listed.
+
+``` r
+
+pe <- get_senators(state = "PE", cache_dir = cache)
+pe[, c("person_id", "name", "current_party", "mandate_role", "exercise_start")]
+#> # A tibble: 3 × 5
+#>   person_id   name            current_party mandate_role exercise_start
+#>   <chr>       <chr>           <chr>         <chr>        <date>        
+#> 1 senado:5917 Fernando Dueire PSD           alternate    2023-09-04    
+#> 2 senado:5008 Humberto Costa  PT            principal    2019-02-01    
+#> 3 senado:6338 Teresa Leitão   PT            principal    2023-02-01
+```
+
+`person_id` is namespaced by house (`senado:`, `camara:`) and is the key
+for the service history. The Senate publishes service periods; the
+Chamber publishes status records, and the package does not turn one into
+the other.
+
+``` r
+
+h <- get_service_history(pe$person_id[[1]], cache_dir = cache)
+h[, c("mandate_id", "record_type", "exercise_start", "exercise_end", "description")]
+#> # A tibble: 2 × 5
+#>   mandate_id record_type    exercise_start exercise_end description       
+#>   <chr>      <chr>          <date>         <date>       <chr>             
+#> 1 526        service_period 2022-12-07     2023-09-04   Retorno do titular
+#> 2 526        service_period 2023-09-04     NA           <NA>
+```
+
+[`get_deputies()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md)
+works the same way; without `state` it issues one detail request per
+deputy, so the first national call takes a few minutes.
+
+## Provenance and caching
+
+- Every tibble from
+  [`get_elected()`](https://strategicprojects.github.io/electedBR/reference/get_elected.md)
+  carries a `source` attribute with the TSE dataset page, and the
+  parliamentary tables carry the API URL in `source` and the collection
+  time in `retrieved_at` (UTC).
+- Yearly files are verified against the size and MD5 in `elected_years`.
+  `refresh = TRUE` downloads again;
+  [`elected_clear_cache()`](https://strategicprojects.github.io/electedBR/reference/elected_clear_cache.md)
+  empties the cache.
+- Parliamentary queries keep an immutable snapshot of every completed
+  collection under `cache_dir/snapshots/`; a network failure raises an
+  error instead of returning expired data.
+
+&nbsp;
+
+    #> Built on 2026-09-25

@@ -99,7 +99,9 @@ consultar_vereadores(
 
   One or more of `"mayor"`, `"deputy_mayor"`, `"councilor"`,
   `"senator"`, `"federal_deputy"`, `"state_deputy"` and
-  `"district_deputy"`. `NULL` keeps every office in the year.
+  `"district_deputy"`. `NULL` keeps every office in the year. The TSE
+  vote files list no votes for deputy mayors (they run on the mayor's
+  ticket), so `"deputy_mayor"` currently returns no rows.
 
 - party:
 
@@ -150,10 +152,12 @@ attributes `source` (TSE dataset page) and `notice` are set.
 
 ## Details
 
-The first call for a year downloads its Parquet file (a few megabytes)
-into `cache_dir`; later calls read the local copy. Results describe who
-was elected in the poll: they do not establish who currently holds
-office nor current party membership. For sitting members of Congress use
+The first call for a year downloads its Parquet file (about 1 MB for a
+general election, up to 25 MB for a municipal one, see
+`elected_years$bytes`) into `cache_dir`; later calls read the local
+copy. Results describe who was elected in the poll: they do not
+establish who currently holds office nor current party membership. For
+sitting members of Congress use
 [`get_deputies()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md)
 and
 [`get_senators()`](https://strategicprojects.github.io/electedBR/reference/get_deputies.md).

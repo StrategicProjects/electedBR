@@ -78,9 +78,9 @@ elected_years
 #> 2 https://huggingface.co/datasets/mlkwy/electedBR/resolve/main/elected_2020.parquet
 #> 3 https://huggingface.co/datasets/mlkwy/electedBR/resolve/main/elected_2022.parquet
 #> 4 https://huggingface.co/datasets/mlkwy/electedBR/resolve/main/elected_2024.parquet
-#>   bytes  md5 rows built
-#> 1    NA <NA>   NA  <NA>
-#> 2    NA <NA>   NA  <NA>
-#> 3    NA <NA>   NA  <NA>
-#> 4    NA <NA>   NA  <NA>
+#>      bytes                              md5   rows      built
+#> 1  1464952 68b238923cbfc90581d7f099aa186b36  20170 2026-09-25
+#> 2 24574636 8cdbaacb11b4cf484fdec586c279b0aa 375733 2026-09-25
+#> 3  1190139 9451b9491f01d028224502466fb5fe49  16268 2026-09-25
+#> 4 19890579 6b02a3eb7f203b8423bd6a664c892242 300459 2026-09-25
 ```
