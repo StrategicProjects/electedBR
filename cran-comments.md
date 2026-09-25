@@ -14,6 +14,11 @@ This is a new submission.
 
 ## Notes for the reviewers
 
+* The TSE open data portal (<https://dadosabertos.tse.jus.br/>) answers HTTP
+  403 to automated clients (curl, libcurl), so the URL checks report it as
+  forbidden. The site is live and opens in any browser; it is the official
+  source of the data and the link is kept on purpose.
+
 * Examples that download data or query the Chamber of Deputies and Federal
   Senate open data APIs are wrapped in \donttest{} and write only to
   `tempdir()`. Tests run offline against small fixtures.
