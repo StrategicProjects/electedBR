@@ -201,5 +201,5 @@ citation("electedBR")
 ## Code of conduct
 
 Please note that this project is released with a [Contributor Code of
-Conduct](https://strategicprojects.github.io/electedBR/CODE_OF_CONDUCT.md).
+Conduct](https://github.com/StrategicProjects/electedBR/blob/main/CODE_OF_CONDUCT.md).
 By participating you agree to abide by its terms.
